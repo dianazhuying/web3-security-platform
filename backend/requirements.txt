@@ -1,0 +1,10 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+SQLAlchemy>=2.0.30
+pydantic>=2.7.0
+pydantic-settings>=2.3.0
+APScheduler>=3.10.4,<4.0.0
+requests>=2.31.0
+
+# 生产环境使用 PostgreSQL 时, 取消下面一行的注释:
+# psycopg2-binary>=2.9.9

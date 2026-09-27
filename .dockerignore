@@ -1,0 +1,11 @@
+# 构建上下文忽略项
+.git
+**/.git
+**/__pycache__
+**/*.pyc
+backend/.venv
+backend/logs
+backend/*.db
+**/.env
+*.md
+.vscode

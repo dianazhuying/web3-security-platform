@@ -1,0 +1,29 @@
+services:
+  web3-security:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: web3-security:latest
+    container_name: web3-security
+    ports:
+      - "8000:8000"            # 前端页面 + API 同一端口
+    volumes:
+      - web3_data:/app/data    # SQLite 数据持久化 (容器重建不丢数据)
+    environment:
+      - DATABASE_URL=sqlite:////app/data/web3_security.db
+      - FRONTEND_DIR=/app/frontend
+      - LOG_DIR=/app/logs
+      - TZ=Asia/Shanghai
+      - DATA_SOURCE=defillama  # 真实数据源; 改 simulate 可回退模拟
+      - FETCH_BATCH_SIZE=5
+      - ENABLE_SCHEDULER=true  # 每小时定时抓取
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  web3_data:

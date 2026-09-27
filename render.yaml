@@ -1,0 +1,39 @@
+# Render 蓝图配置: 部署 Web3 安全事件分析平台 (Python Web 服务)
+# 文档: https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: web3-security
+    runtime: python
+    plan: free
+    buildCommand: cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: DATA_SOURCE
+        value: defillama
+      - key: ENABLE_SCHEDULER
+        value: "true"
+      - key: FETCH_INTERVAL_SECONDS
+        value: "3600"
+      - key: FETCH_BATCH_SIZE
+        value: "5"
+      - key: FETCH_RETRY_TIMES
+        value: "3"
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: LOG_LEVEL
+        value: INFO
+      - key: SCHEDULER_TIMEZONE
+        value: Asia/Shanghai
+      # 生产推荐使用 PostgreSQL (Render 新建 PostgreSQL 实例后填入连接串):
+      # - key: DATABASE_URL
+      #   fromDatabase:
+      #     name: web3-security-db
+      #     property: connectionString
+
+# 可选: 若使用 Render 托管的 PostgreSQL
+# databases:
+#   - name: web3-security-db
+#     plan: free
+#     databaseName: web3_security
+#     user: web3_security
