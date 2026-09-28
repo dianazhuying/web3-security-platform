@@ -30,7 +30,7 @@ def build_base_incident(i: int) -> Incident:
 
     return Incident(
         external_id=f"inc_{i}",
-        title=f"{p[0]} - 链上安全攻击事件 #{i} ({r[2]})",
+        title=f"{p[0]} - {r[2]}",
         chain=p[1],
         project_name=p[0],
         contract_type=p[2],

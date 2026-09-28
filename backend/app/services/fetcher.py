@@ -184,7 +184,7 @@ def _simulate_fetch(db: Session) -> Incident:
 
     incident = Incident(
         external_id=f"ext_fetched_{int(fetched_at.timestamp())}",
-        title=f"{p[0]} - 刚刚抓取链上安全攻击事件 #{counter}",
+        title=f"{p[0]} - {r[2]}",
         chain=p[1],
         project_name=p[0],
         contract_type=p[2],
