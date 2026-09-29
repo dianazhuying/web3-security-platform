@@ -7,4 +7,6 @@ APScheduler>=3.10.4,<4.0.0
 requests>=2.31.0
 
 # PostgreSQL 驱动 (生产部署时由 DATABASE_URL 使用)
+# 同时提供 psycopg2 与 psycopg(3), 兼容 SQLAlchemy 的 postgresql:// 与 postgresql+psycopg:// 两种方言
 psycopg2-binary>=2.9.9
+psycopg[binary]>=3.1.19
