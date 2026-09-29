@@ -25,15 +25,15 @@ services:
         value: INFO
       - key: SCHEDULER_TIMEZONE
         value: Asia/Shanghai
-      # 生产推荐使用 PostgreSQL (Render 新建 PostgreSQL 实例后填入连接串):
-      # - key: DATABASE_URL
-      #   fromDatabase:
-      #     name: web3-security-db
-      #     property: connectionString
+      # 使用 Render 托管 PostgreSQL 连接串 (持久化案例库, 重启不丢数据)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: web3-security-db
+          property: connectionString
 
-# 可选: 若使用 Render 托管的 PostgreSQL
-# databases:
-#   - name: web3-security-db
-#     plan: free
-#     databaseName: web3_security
-#     user: web3_security
+# Render 托管的 PostgreSQL 数据库 (免费实例, 持久化案例库)
+databases:
+  - name: web3-security-db
+    plan: free
+    databaseName: web3_security
+    user: web3_security
