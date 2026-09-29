@@ -24,8 +24,11 @@ class Settings(BaseSettings):
 
     # 数据源: defillama (真实公开接口) | simulate (模拟回退)
     DATA_SOURCE: str = "defillama"
-    # 单次真实抓取最多新入库的事件数
+    # 单次真实抓取最多新入库的事件数 (仅增量模式生效)
     FETCH_BATCH_SIZE: int = 5
+    # 全量拉取: True=一次抓取 DefiLlama 自 2013 至今全部事件并去重入库;
+    # False=每轮最多入库 FETCH_BATCH_SIZE 条最新事件
+    FETCH_FULL_PULL: bool = True
     # DefiLlama Hacks 公共数据接口
     DEFILLAMA_HACKS_URL: str = "https://api.llama.fi/hacks"
 

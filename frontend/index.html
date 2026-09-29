@@ -511,7 +511,7 @@
                 }).join("");
 
                 document.getElementById("riskClass").innerText = d.risk_class;
-                document.getElementById("rootCause").innerHTML = `类别 ID: ${d.root_cause_id}<br>具体根因: ${d.root_cause_text}`;
+                document.getElementById("rootCause").innerHTML = `${d.root_cause_text}`;
                 document.getElementById("sigDescription").innerText = "特征描述: " + d.sig_desc;
                 document.getElementById("sigValues").innerText = "特征匹配值: " + d.sig_val;
 

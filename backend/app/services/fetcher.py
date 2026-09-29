@@ -150,6 +150,8 @@ def fetch_defillama_latest(db: Session, max_items: int) -> list[Incident]:
     rows = sorted((r for r in payload if r.get("date")), key=lambda r: r["date"], reverse=True)
 
     inserted: list[Incident] = []
+    full_pull = settings.FETCH_FULL_PULL
+    chunk = 500 if full_pull else max_items
     for row in rows:
         ext_id = f"defillama-{row.get('defillamaId') or row.get('name')}"
         if ext_id in existing:
@@ -160,14 +162,21 @@ def fetch_defillama_latest(db: Session, max_items: int) -> list[Incident]:
         db.add(inc)
         existing.add(ext_id)
         inserted.append(inc)
-        if len(inserted) >= max_items:
+        # 全量拉取: 不设总数上限, 分批提交; 增量模式: 每轮最多 max_items 条
+        if len(inserted) % chunk == 0:
+            db.commit()
+        if not full_pull and len(inserted) >= max_items:
             break
 
     if inserted:
         db.commit()
         for inc in inserted:
             db.refresh(inc)
-        logger.info("[fetcher] 真实数据源入库 %s 起新事件, 最新: %s", len(inserted), inserted[0].title)
+        logger.info(
+            "[fetcher] 真实数据源全量/增量入库 %s 起新事件 (earliest ~latest), 最新: %s",
+            len(inserted),
+            inserted[0].title,
+        )
     return inserted
 
 
