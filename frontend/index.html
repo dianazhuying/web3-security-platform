@@ -349,6 +349,24 @@
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
         }
 
+        // 特征匹配值 → 高可读 SIG 标签 (<code> 小字号灰字), 替代原始调试变量 sig_pattern_xx_...
+        function formatSig(v) {
+            if (!v) return '<code class="text-[11px] text-inkMuted font-mono">&mdash;</code>';
+            let m = v.match(/^sig_pattern_(\d+)(?:_(\w+))?$/);
+            if (m) {
+                const sig = "<b>SIG-</b>" + String(+m[1]).padStart(3, "0");
+                if (m[2] === "flashloan_or_privkey") return `<code class="text-[11px] text-inkSecondary font-mono">${sig} · Flashloan / PrivKey</code>`;
+                return `<code class="text-[11px] text-inkSecondary font-mono">${sig}</code>`;
+            }
+            m = v.match(/^sig_defillama_(.+)$/);
+            if (m) {
+                const t = m[1].replace(/[-_]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+                return `<code class="text-[11px] text-inkSecondary font-mono">SIG-DEF · ${t}</code>`;
+            }
+            // 兜底: 保留原始值但弱化显示
+            return `<code class="text-[11px] text-inkMuted font-mono break-all">${v}</code>`;
+        }
+
         function showToast(msg, type = "success") {
             const el = document.getElementById("toast");
             el.textContent = msg;
@@ -513,7 +531,7 @@
                 document.getElementById("riskClass").innerText = d.risk_class;
                 document.getElementById("rootCause").innerHTML = `${d.root_cause_text}`;
                 document.getElementById("sigDescription").innerText = "特征描述: " + d.sig_desc;
-                document.getElementById("sigValues").innerText = "特征匹配值: " + d.sig_val;
+                document.getElementById("sigValues").innerHTML = formatSig(d.sig_val);
 
                 document.getElementById("userAdvisory").innerText = d.user_advisory;
                 document.getElementById("projectAdvisory").innerText = d.project_advisory;
