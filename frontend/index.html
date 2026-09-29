@@ -401,12 +401,12 @@
                 if (currentFilters.q) params.q = currentFilters.q;
 
                 const data = await apiGet("/incidents", params);
-                listTotal = data.total;
+                listTotal = data.total_count ?? data.total;
                 currentPage = data.page;
                 const mapped = data.items;
                 incidentList = reset ? mapped : [...incidentList, ...mapped];
 
-                document.getElementById("eventCountBadge").innerText = `${incidentList.length} / ${listTotal} 起`;
+                document.getElementById("eventCountBadge").innerText = `已加载 ${incidentList.length} / 共 ${listTotal} 起`;
                 renderIncidentList();
                 toggleLoadMore(data.items.length === PAGE_SIZE);
 
@@ -565,7 +565,7 @@
 
                 document.getElementById("totalCountDisplay").innerText = `${s.total_incidents} 起`;
                 document.getElementById("lossAmountDisplay").innerText = "$" + Math.round(s.total_loss_usd).toLocaleString("en-US");
-                document.getElementById("eventCountBadge").innerText = `${incidentList.length} / ${s.total_incidents} 起`;
+                document.getElementById("eventCountBadge").innerText = `已加载 ${incidentList.length} / 共 ${s.total_incidents} 起`;
 
                 if (chart && s.category_distribution) {
                     chart.data.labels = s.category_distribution.map(d => chartLabelMap[d.name] || d.name);

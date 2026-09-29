@@ -41,7 +41,7 @@ def list_incidents(
         page=page,
         page_size=page_size,
     )
-    return schemas.IncidentListResponse(total=total, page=page, page_size=page_size, items=items)
+    return schemas.IncidentListResponse(total=total, total_count=total, page=page, page_size=page_size, items=items)
 
 
 @router.get(
