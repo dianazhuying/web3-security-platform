@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="color-scheme" content="dark">
+    <meta name="color-scheme" content="light">
     <title>Web3 Security Intelligence - 全网安全事件抓取平台</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,26 +16,26 @@
             theme: {
                 extend: {
                     colors: {
-                        bgBase: '#1E1E1E',
-                        panel: '#242424',
-                        line: '#3F3F46',
-                        gold: '#C8E86C',
-                        goldDim: '#D4F574',
-                        inkPrimary: '#FFFFFF',
-                        inkSecondary: '#A1A1AA',
-                        inkMuted: '#71717A'
+                        bgBase: '#F8F9FA',
+                        panel: '#FFFFFF',
+                        line: '#E5E7EB',
+                        gold: '#2563EB',
+                        goldDim: '#1D4ED8',
+                        inkPrimary: '#1F2937',
+                        inkSecondary: '#6B7280',
+                        inkMuted: '#9CA3AF'
                     },
                     fontFamily: {
                         sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
                     },
                     keyframes: {
                         pulseGlow: {
-                            '0%, 100%': { borderColor: 'rgba(200, 232, 108, 0.25)', boxShadow: 'none' },
-                            '50%': { borderColor: 'rgba(200, 232, 108, 0.9)', boxShadow: '0 0 18px rgba(200, 232, 108, 0.15)' }
+                            '0%, 100%': { borderColor: 'rgba(37, 99, 235, 0.25)', boxShadow: 'none' },
+                            '50%': { borderColor: 'rgba(37, 99, 235, 0.9)', boxShadow: '0 0 18px rgba(37, 99, 235, 0.15)' }
                         },
                         highlightNew: {
-                            '0%': { backgroundColor: 'rgba(200, 232, 108, 0.10)', borderColor: 'rgba(200, 232, 108, 0.45)' },
-                            '100%': { backgroundColor: '#1a1a1a', borderColor: '#2a2a2a' }
+                            '0%': { backgroundColor: 'rgba(37, 99, 235, 0.10)', borderColor: 'rgba(37, 99, 235, 0.45)' },
+                            '100%': { backgroundColor: '#FFFFFF', borderColor: '#E5E7EB' }
                         }
                     },
                     animation: {
@@ -47,7 +47,7 @@
         }
     </script>
 </head>
-<body class="bg-bgBase bg-[radial-gradient(ellipse_at_top,_rgba(200,232,108,0.05),_transparent_55%)] text-inkSecondary font-sans min-h-screen">
+<body class="bg-bgBase bg-[radial-gradient(ellipse_at_top,_rgba(37,99,235,0.05),_transparent_55%)] text-inkSecondary font-sans min-h-screen">
 
     <!-- ===================== 主内容区 (全宽) ===================== -->
     <div class="flex-1 min-w-0 flex flex-col">
@@ -175,13 +175,13 @@
                         <div>
                             <div class="flex items-center gap-2 mb-2">
                                 <span id="riskBadge" class="bg-gold/10 text-gold border border-gold/30 text-xs px-2.5 py-0.5 rounded-full font-semibold">严重度: --</span>
-                                <span id="statusBadge" class="bg-white/5 text-inkSecondary border border-line text-xs px-2.5 py-0.5 rounded-full font-semibold">事件状态: --</span>
+                                <span id="statusBadge" class="bg-[#F3F4F6] text-inkSecondary border border-line text-xs px-2.5 py-0.5 rounded-full font-semibold">事件状态: --</span>
                                 <span id="chainTag" class="bg-transparent text-inkSecondary border border-line text-xs px-2.5 py-0.5 rounded-full font-mono font-medium">--</span>
                             </div>
                             <h3 id="eventTitle" class="text-lg font-bold text-inkPrimary">加载中...</h3>
                             <p id="eventTime" class="text-xs text-inkMuted mt-1.5">事件抓取时间: --</p>
                         </div>
-                        <button onclick="submitCorrection()" class="text-xs border border-gold/40 text-gold hover:bg-gold hover:text-black font-medium px-3 py-1.5 rounded-lg transition shrink-0">提交纠错</button>
+                        <button onclick="submitCorrection()" class="text-xs border border-gold/40 text-gold hover:bg-gold hover:text-white font-medium px-3 py-1.5 rounded-lg transition shrink-0">提交纠错</button>
                     </div>
 
                     <!-- 模块 2: 报道出处锚点卡片 -->
@@ -205,7 +205,7 @@
                     </div>
 
                     <!-- 模块 3: 受影响项目履历与合约元数据 -->
-                    <div class="bg-[#141414] p-4 rounded-xl border border-line space-y-3">
+                    <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-3">
                         <div class="text-xs font-semibold text-inkPrimary flex items-center gap-1.5 border-b border-line pb-2">
                             <i data-lucide="database" class="w-4 h-4 text-gold"></i> 基础信息
                         </div>
@@ -240,40 +240,40 @@
 
                     <!-- 模块 4: 风险大类 / 攻击根因 / 攻击特征 -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="bg-[#141414] p-4 rounded-xl border border-line space-y-2">
+                        <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-2">
                             <div class="text-xs text-inkMuted flex justify-between items-center font-semibold">
                                 <span class="flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-gold/80"></i> 风险大类</span>
                             </div>
                             <div class="text-sm font-semibold text-inkPrimary" id="riskClass">--</div>
                         </div>
-                        <div class="bg-[#141414] p-4 rounded-xl border border-line space-y-2">
+                        <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-2">
                             <div class="text-xs text-inkMuted flex justify-between items-center font-semibold">
                                 <span class="flex items-center gap-1"><i data-lucide="crosshair" class="w-3.5 h-3.5 text-gold/80"></i> 攻击根因</span>
                             </div>
-                            <div class="text-xs text-gold/90 font-mono bg-[#1f1f1f] p-2.5 rounded border border-line" id="rootCause">--</div>
+                            <div class="text-xs text-gold/90 font-mono bg-[#F9FAFB] p-2.5 rounded border border-line" id="rootCause">--</div>
                         </div>
-                        <div class="bg-[#141414] p-4 rounded-xl border border-line space-y-2">
+                        <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-2">
                             <div class="text-xs text-inkMuted flex justify-between items-center font-semibold">
                                 <span class="flex items-center gap-1"><i data-lucide="code-2" class="w-3.5 h-3.5 text-gold/80"></i> 攻击特征</span>
                             </div>
                             <div class="text-xs text-inkSecondary font-medium" id="sigDescription">--</div>
-                            <div class="text-xs text-inkMuted font-mono bg-[#1f1f1f] p-2.5 rounded border border-line" id="sigValues">--</div>
+                            <div class="text-xs text-inkMuted font-mono bg-[#F9FAFB] p-2.5 rounded border border-line" id="sigValues">--</div>
                         </div>
                     </div>
 
                     <!-- 模块 5: 处置建议 -->
-                    <div class="bg-[#141414] p-4 rounded-xl border border-line space-y-3">
+                    <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-3">
                         <div class="text-xs font-semibold text-inkPrimary flex items-center gap-1.5 border-b border-line pb-2">
                             <i data-lucide="check-circle-2" class="w-4 h-4 text-gold/80"></i> 处置建议
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="p-3.5 bg-white/5 border border-line rounded-lg">
+                            <div class="p-3.5 bg-[#F3F4F6] border border-line rounded-lg">
                                 <div class="text-xs font-bold text-inkSecondary mb-1 flex items-center gap-1">
                                     <i data-lucide="user-x" class="w-3.5 h-3.5"></i> 终端用户
                                 </div>
                                 <p class="text-xs text-inkSecondary leading-relaxed font-medium" id="userAdvisory">--</p>
                             </div>
-                            <div class="p-3.5 bg-white/5 border border-line rounded-lg">
+                            <div class="p-3.5 bg-[#F3F4F6] border border-line rounded-lg">
                                 <div class="text-xs font-bold text-inkSecondary mb-1 flex items-center gap-1">
                                     <i data-lucide="building-2" class="w-3.5 h-3.5"></i> 项目方
                                 </div>
@@ -283,7 +283,7 @@
                     </div>
 
                     <!-- 模块 6: 4 等级可信追溯报告 -->
-                    <div class="bg-[#141414] p-4 rounded-xl border border-line space-y-4" id="traceabilitySection">
+                    <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-4" id="traceabilitySection">
                         <div class="text-xs font-semibold text-inkPrimary flex items-center justify-between border-b border-line pb-2">
                             <div class="flex items-center gap-2">
                                 <i data-lucide="git-commit" class="w-4 h-4 text-gold/80"></i>
@@ -303,7 +303,7 @@
     </div>
 
     <!-- 轻量 Toast -->
-    <div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:60;display:none;background:#242424;color:#fff;font-size:12px;padding:10px 16px;border-radius:8px;border:1px solid rgba(200,232,108,0.3);box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:80vw;line-height:1.5"></div>
+    <div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:60;display:none;background:#2563EB;color:#fff;font-size:12px;padding:10px 16px;border-radius:8px;border:1px solid #E5E7EB;box-shadow:0 8px 24px rgba(0,0,0,.15);max-width:80vw;line-height:1.5"></div>
 
     <!-- 逻辑脚本 -->
     <script>
@@ -339,8 +339,8 @@
             "社会工程风险 / 终端用户与开发环境劫持": "社会工程/开发环境",
             "智能合约技术风险": "智能合约代码漏洞"
         };
-        // 深色系 + 黄绿柠檬色系饼图配色
-        const CHART_COLORS = ["#C8E86C", "#A8C94A", "#8FA63F", "#D3E98F", "#71717A"];
+        // 明亮 + 蓝色系饼图配色
+        const CHART_COLORS = ["#2563EB", "#3B82F6", "#60A5FA", "#93C5FD", "#9CA3AF"];
 
         function fmt(iso) {
             if (!iso) return "--";
@@ -349,29 +349,32 @@
             return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
         }
 
-        // 特征匹配值 → 高可读 SIG 标签 (<code> 小字号灰字), 替代原始调试变量 sig_pattern_xx_...
+        // 特征匹配值 → 高可读 SIG 芯片 Tag (hover 显示原始全称), 替代原始调试变量 sig_pattern_xx_...
         function formatSig(v) {
-            if (!v) return '<code class="text-[11px] text-inkMuted font-mono">&mdash;</code>';
+            const chipCls = "inline-flex items-center gap-1 bg-[#F3F4F6] rounded-md px-1.5 py-0.5 text-[11px] font-mono text-gray-700 cursor-default";
+            const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+            const chip = (label, extra = "") => `<span class="${chipCls} ${extra}" title="${esc(v)}" style="white-space:nowrap">${label}</span>`;
+            if (!v) return '<span class="text-[11px] text-inkMuted font-mono">&mdash;</span>';
             let m = v.match(/^sig_pattern_(\d+)(?:_(\w+))?$/);
             if (m) {
-                const sig = "<b>SIG-</b>" + String(+m[1]).padStart(3, "0");
-                if (m[2] === "flashloan_or_privkey") return `<code class="text-[11px] text-inkSecondary font-mono">${sig} · Flashloan / PrivKey</code>`;
-                return `<code class="text-[11px] text-inkSecondary font-mono">${sig}</code>`;
+                const num = String(+m[1]).padStart(3, "0");
+                if (m[2] === "flashloan_or_privkey") return chip(`SIG: PATTERN-${num} (Flashloan / PrivKey)`);
+                return chip(`SIG: PATTERN-${num}`);
             }
             m = v.match(/^sig_defillama_(.+)$/);
             if (m) {
                 const t = m[1].replace(/[-_]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-                return `<code class="text-[11px] text-inkSecondary font-mono">SIG-DEF · ${t}</code>`;
+                return chip(`SIG: DEF-${t}`);
             }
-            // 兜底: 保留原始值但弱化显示
-            return `<code class="text-[11px] text-inkMuted font-mono break-all">${v}</code>`;
+            // 兜底: 保留原始值但弱化显示, hover 显示完整全称
+            return chip(`SIG: ${esc(v)}`, "break-all");
         }
 
         function showToast(msg, type = "success") {
             const el = document.getElementById("toast");
             el.textContent = msg;
             el.style.display = "block";
-            el.style.background = type === "error" ? "#B91C1C" : "#0F172A";
+            el.style.background = type === "error" ? "#B91C1C" : "#2563EB";
             clearTimeout(el._timer);
             el._timer = setTimeout(() => { el.style.display = "none"; }, 3000);
         }
@@ -450,20 +453,21 @@
                 const isBrandNew = idx === 0;
 
                 let activeStyle = isSelected
-                    ? "bg-panel border-gold/60 text-inkPrimary font-medium shadow-[0_0_16px_rgba(200,232,108,0.08)]"
-                    : "bg-[#171717] border-line hover:bg-[#1f1f1f] hover:border-[#3a3a3a] text-inkSecondary";
+                    ? "relative bg-[#F3F4F6] border-gold/30 border-l-0 text-inkPrimary font-medium"
+                    : "bg-white hover:bg-[#F3F4F6] hover:border-[#E5E7EB] text-inkSecondary border-line";
 
                 if (isBrandNew) activeStyle += " animate-highlightNew";
 
                 const severityBadge = item.severity === "极高"
                     ? '<span class="text-[10px] bg-gold/10 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-medium">极高</span>'
-                    : '<span class="text-[10px] bg-white/5 text-inkSecondary border border-line px-1.5 py-0.5 rounded font-medium">高</span>';
+                    : '<span class="text-[10px] bg-[#F3F4F6] text-inkSecondary border border-line px-1.5 py-0.5 rounded font-medium">高</span>';
 
-                const newIndicator = isBrandNew ? '<span class="text-[9px] bg-gold text-black font-bold px-1 rounded mr-1">NEW</span>' : '';
+                const newIndicator = isBrandNew ? '<span class="text-[9px] bg-gold text-white font-bold px-1 rounded mr-1">NEW</span>' : '';
                 const timePart = item.fetched_at ? fmt(item.fetched_at).split(" ")[1] : "";
 
                 return `
                     <div onclick="selectIncident(${item.id})" class="p-2.5 rounded-lg border transition cursor-pointer space-y-1 ${activeStyle}">
+                        ${isSelected ? '<span class="absolute left-0 top-0 h-full w-0.5 bg-gold"></span>' : ''}
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] text-inkMuted flex items-center">${newIndicator} ${item.chain} · ${timePart}</span>
                             ${severityBadge}
@@ -504,18 +508,18 @@
                 const traceContainer = document.getElementById("traceabilityLinksContainer");
                 traceContainer.innerHTML = d.trace_links.map((link, idx) => {
                     const cardId = idx === 0 ? "id='traceCard_L1'" : "";
-                    const levelColor = idx === 0 ? "bg-gold/10 text-gold border-gold/30" : "bg-white/5 text-inkSecondary border-line";
+                    const levelColor = idx === 0 ? "bg-gold/10 text-gold border-gold/30" : "bg-[#F3F4F6] text-inkSecondary border-line";
 
                     const actionButton = link.url
-                        ? `<a href="${link.url}" target="_blank" rel="noopener" class="text-xs bg-transparent hover:bg-gold hover:text-black text-inkSecondary px-2.5 py-1 rounded border border-line hover:border-gold flex items-center gap-1 transition shrink-0">
+                        ? `<a href="${link.url}" target="_blank" rel="noopener" class="text-xs bg-transparent hover:bg-gold hover:text-white text-inkSecondary px-2.5 py-1 rounded border border-line hover:border-gold flex items-center gap-1 transition shrink-0">
                                 <span>查看该事件核验</span>
                                 <i data-lucide="external-link" class="w-3 h-3"></i>
                            </a>`
                         : `<span class="text-[10px] bg-transparent text-inkMuted px-2 py-1 rounded border border-line cursor-not-allowed shrink-0">暂未收录凭证</span>`;
 
                     return `
-                        <div ${cardId} class="relative p-3 bg-[#171717] hover:bg-[#1f1f1f] border border-line hover:border-gold/50 rounded-xl transition flex justify-between items-center gap-3 group">
-                            <div class="absolute -left-[21px] top-4 w-2.5 h-2.5 rounded-full bg-gold border-2 border-[#141414]"></div>
+                        <div ${cardId} class="relative p-3 bg-white hover:bg-[#F9FAFB] border border-line hover:border-gold/50 rounded-xl transition flex justify-between items-center gap-3 group">
+                            <div class="absolute -left-[21px] top-4 w-2.5 h-2.5 rounded-full bg-gold border-2 border-white"></div>
                             <div class="space-y-0.5 min-w-0">
                                 <div class="flex items-center gap-2">
                                     <span class="text-[10px] ${levelColor} border px-1.5 py-0.5 rounded font-mono font-semibold shrink-0">${link.level}</span>
