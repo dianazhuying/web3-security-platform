@@ -61,14 +61,15 @@
                     // "To those who wrote the future in silence, before the world was ready to listen."
                 </p>
             </div>
-            <!-- 底部向下滚动引导 -->
-            <div class="absolute inset-x-0 bottom-8 flex justify-center pointer-events-none">
-                <span class="text-xs font-mono text-gray-400 tracking-widest animate-bounce">↓ SCROLL FOR INTELLIGENCE</span>
+            <!-- 底部向下滚动引导 (点击平滑滚动到搜索区) -->
+            <div class="absolute inset-x-0 bottom-8 flex justify-center">
+                <span id="scrollHint" onclick="document.getElementById('searchSection').scrollIntoView({behavior:'smooth'})"
+                      class="text-xs font-mono whitespace-nowrap text-gray-500 tracking-widest cursor-pointer select-none animate-bounce">↓ SCROLL FOR INTELLIGENCE</span>
             </div>
         </section>
 
         <!-- 主内容 -->
-        <main class="flex-1 px-6 lg:px-8 py-6 space-y-6 max-w-[1500px] w-full mx-auto">
+        <main id="searchSection" class="flex-1 px-6 lg:px-8 py-6 space-y-6 max-w-[1500px] w-full mx-auto">
 
             <!-- 核心指标概览 -->
             <section class="grid grid-cols-2 sm:grid-cols-4 gap-4">
