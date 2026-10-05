@@ -33,6 +33,12 @@ async def lifespan(app: FastAPI):
         db.close()
     # 3. 启动每小时定时抓取
     start_scheduler()
+    # 4. 数据源自检 (诊断真实源可达性, 不阻断启动)
+    try:
+        from app.services.fetcher import check_source_reachability
+        logger.info("[startup] 数据源自检结果: %s", check_source_reachability())
+    except Exception as exc:  # noqa: BLE001 - 自检失败不影响启动
+        logger.warning("[startup] 数据源自检异常: %s", exc)
     yield
     stop_scheduler()
 

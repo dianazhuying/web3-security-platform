@@ -54,6 +54,30 @@ def _http_get_json(url: str, timeout: int = 30):
         return json.loads(resp.read().decode("utf-8"))
 
 
+def check_source_reachability() -> dict:
+    """启动自检: 测试真实数据源 (DefiLlama) 可达性, 供部署环境诊断.
+
+    记录 HTTP 状态/数据条数/耗时/异常, 不抛异常 (诊断用, 不影响应用启动).
+    """
+    url = settings.DEFILLAMA_HACKS_URL
+    if settings.DATA_SOURCE == "simulate":
+        logger.info("[fetcher] DATA_SOURCE=simulate, 无需自检真实源")
+        return {"ok": True, "note": "simulate"}
+    try:
+        start = time.time()
+        payload = _http_get_json(url, timeout=20)
+        elapsed = round(time.time() - start, 2)
+        count = len(payload) if isinstance(payload, list) else -1
+        logger.info(
+            "[fetcher] 启动自检成功: 数据源 %s 可达, 耗时 %.2fs, 数据条数 %s",
+            url, elapsed, count,
+        )
+        return {"ok": True, "url": url, "elapsed_s": elapsed, "record_count": count}
+    except Exception as exc:  # noqa: BLE001 - 诊断用, 记录即可
+        logger.exception("[fetcher] 启动自检失败: 数据源 %s 不可达 -> %s", url, exc)
+        return {"ok": False, "url": url, "error": repr(exc)}
+
+
 def _severity_for(amount: float) -> str:
     if amount >= 100_000_000:
         return "极高"
