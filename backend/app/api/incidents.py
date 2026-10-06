@@ -25,6 +25,7 @@ def list_incidents(
     q: Optional[str] = Query(default=None, description="关键词, 匹配标题/项目名/公链"),
     year: Optional[int] = Query(default=None, ge=2000, le=2100, description="按事件发生年份过滤, e.g. 2023"),
     month: Optional[int] = Query(default=None, ge=1, le=12, description="按事件发生月份过滤, e.g. 5"),
+    report: Optional[str] = Query(default=None, description="按可信追溯报告完整度过滤: none=无链接, g1/g2/g3=至少N级, g4=完整4级"),
     page: int = Query(default=1, ge=1, description="页码, 从 1 开始"),
     page_size: int = Query(default=20, ge=1, le=100, description="每页数量"),
     db: Session = Depends(get_db),
@@ -42,6 +43,7 @@ def list_incidents(
         q=q,
         year=year,
         month=month,
+        report=report,
         page=page,
         page_size=page_size,
     )
