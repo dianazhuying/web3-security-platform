@@ -149,7 +149,7 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
                 <div class="relative">
-                    <select id="reportFilter" onchange="filterIncidents()" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
+                    <select id="reportFilter" onchange="filterIncidents()" title="按可信追溯报告的凭证完整度筛选：完整度 = L1 数据源 / L2 分类标签 / L3 攻击技术与复盘 / L4 链上凭证 中等存在可点击链接的层数。" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
                         <option value="ALL">追溯报告</option>
                         <option value="none">无可信追溯</option>
                         <option value="g1">报告 ≥1 级</option>
