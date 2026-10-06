@@ -444,7 +444,7 @@
                 const mapped = data.items;
                 incidentList = reset ? mapped : [...incidentList, ...mapped];
 
-                document.getElementById("eventCountBadge").innerText = `已加载 ${incidentList.length} / 共 ${listTotal} 起`;
+                document.getElementById("eventCountBadge").innerText = `共 ${listTotal} 起`;
                 renderIncidentList();
                 toggleLoadMore(data.items.length === PAGE_SIZE);
 
@@ -605,7 +605,7 @@
 
                 document.getElementById("totalCountDisplay").innerText = `${s.total_incidents} 起`;
                 document.getElementById("lossAmountDisplay").innerText = "$" + Math.round(s.total_loss_usd).toLocaleString("en-US");
-                document.getElementById("eventCountBadge").innerText = `已加载 ${incidentList.length} / 共 ${s.total_incidents} 起`;
+                document.getElementById("eventCountBadge").innerText = `共 ${s.total_incidents} 起`;
 
                 if (chart && s.category_distribution) {
                     chart.data.labels = s.category_distribution.map(d => chartLabelMap[d.name] || d.name);
