@@ -51,31 +51,33 @@ def build_base_incident(i: int) -> Incident:
         occurred_at=BASE_FETCH_TIME,
         fetched_at=BASE_FETCH_TIME,
         trace_links=[
+            # 阶段一(清理): 原有字符串拼接的虚构 URL 一律置空, 由前端判空渲染为"暂未收录凭证",
+            # 杜绝点击 404。待阶段二真实抓取管道接入后按 event_id 绑定真实来源。
             IncidentTraceLink(
                 level="L1 警报现场",
                 name=f"{s[0].split(' ')[0]} 关于 {p[0]} 的首发 X 警报推文",
-                url=f"https://x.com/PeckShieldAlert/status/{tweet_id}",
+                url="",
                 description=f"推文 ID: #{tweet_id}",
                 sort_order=0,
             ),
             IncidentTraceLink(
                 level="L2 技术快讯",
                 name=f"{p[0]} 漏洞与攻击复盘分析",
-                url=f"https://slowmist.com/post-mortem/2026-{slug}-incident.html",
+                url="",
                 description="技术快讯: 攻击路径与漏洞逻辑拆解",
                 sort_order=1,
             ),
             IncidentTraceLink(
                 level="L3 深度分析",
                 name=f"{p[0]} 资金流向与洗钱链路追踪研报" if has_l3 else "暂未收录该层级研报",
-                url=f"https://trmlabs.com/reports/{slug}-analysis" if has_l3 else "",
+                url="",
                 description="Chainalysis / TRM 资金追查研报" if has_l3 else "小规模事件未触发第三方深度研报",
                 sort_order=2,
             ),
             IncidentTraceLink(
                 level="L4 链上凭证",
                 name=f"{p[1]} 黑客攻击交易凭证 (TxHash)",
-                url=f"https://solscan.io/tx/{tx_hash}" if p[1] == "Solana" else f"https://etherscan.io/tx/{tx_hash}",
+                url="",
                 description=f"交易哈希: {tx_hash[:20]}...",
                 sort_order=3,
             ),
