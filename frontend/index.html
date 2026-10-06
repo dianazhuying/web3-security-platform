@@ -136,6 +136,18 @@
                     </select>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
+                <div class="relative">
+                    <select id="yearFilter" onchange="filterIncidents()" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
+                        <option value="ALL">全部年份</option>
+                    </select>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="relative">
+                    <select id="monthFilter" onchange="filterIncidents()" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
+                        <option value="ALL">全部月份</option>
+                    </select>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
                 <span class="ml-auto text-[10px] text-inkMuted font-mono hidden xl:inline">GET /api/v1/admin/fetch-status</span>
             </div>
 
@@ -392,7 +404,26 @@
         let loadingList = false;
         let searchTimer = null;
         let chart = null;
-        const currentFilters = { category: "ALL", status: "ALL", q: "" };
+        const currentFilters = { category: "ALL", status: "ALL", q: "", year: "ALL", month: "ALL" };
+
+        // 填充年份(2013~当前)与月份(1-12月)下拉选项
+        function initPeriodFilters() {
+            const yearSel = document.getElementById("yearFilter");
+            const nowYear = new Date().getFullYear();
+            for (let y = nowYear; y >= 2013; y--) {
+                const op = document.createElement("option");
+                op.value = String(y);
+                op.textContent = y + "年";
+                yearSel.appendChild(op);
+            }
+            const monthSel = document.getElementById("monthFilter");
+            for (let m = 1; m <= 12; m++) {
+                const op = document.createElement("option");
+                op.value = String(m);
+                op.textContent = m + "月";
+                monthSel.appendChild(op);
+            }
+        }
 
         // ===================== 事件列表 (服务端加载 + 分页) =====================
         async function loadIncidents(reset = true) {
@@ -404,6 +435,8 @@
                 if (currentFilters.category !== "ALL") params.category = currentFilters.category;
                 if (currentFilters.status !== "ALL") params.status = currentFilters.status;
                 if (currentFilters.q) params.q = currentFilters.q;
+                if (currentFilters.year !== "ALL") params.year = currentFilters.year;
+                if (currentFilters.month !== "ALL") params.month = currentFilters.month;
 
                 const data = await apiGet("/incidents", params);
                 listTotal = data.total_count ?? data.total;
@@ -439,6 +472,8 @@
             currentFilters.category = document.getElementById("riskCategoryFilter").value;
             currentFilters.status = document.getElementById("statusFilter").value;
             currentFilters.q = document.getElementById("searchInput").value.toLowerCase().trim();
+            currentFilters.year = document.getElementById("yearFilter").value;
+            currentFilters.month = document.getElementById("monthFilter").value;
             clearTimeout(searchTimer);
             searchTimer = setTimeout(() => loadIncidents(true), 300);
         }
@@ -655,6 +690,7 @@
         // ===================== 启动 =====================
         window.onload = () => {
             lucide.createIcons();
+            initPeriodFilters();
             initChart();
             autoSizeSelects();
             loadStats();

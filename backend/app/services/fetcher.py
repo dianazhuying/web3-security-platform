@@ -123,6 +123,11 @@ def _build_from_defillama(row: dict, fetched_at: datetime) -> Incident:
     external_id = _fit(f"defillama-{defillama_id}", 64)
     contract_type = _fit(target_type, 128)
     contract_address = _fit(f"DefiLlama#{defillama_id}", 128)
+    occurred_at = (
+        datetime.fromtimestamp(int(row.get("date")), tz=timezone.utc)
+        if row.get("date")
+        else None
+    )
 
     return Incident(
         external_id=external_id,
@@ -131,6 +136,7 @@ def _build_from_defillama(row: dict, fetched_at: datetime) -> Incident:
         project_name=name,
         contract_type=contract_type,
         contract_address=contract_address,
+        occurred_at=occurred_at,
         loss_amount_text=f"约 {int(amount):,} 美元" if amount else "金额待核",
         loss_usd=amount,
         remark=(

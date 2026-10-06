@@ -13,6 +13,7 @@ from app.database import Base, SessionLocal, engine
 from app.logging_config import setup_logging
 from app.services.scheduler import start_scheduler, stop_scheduler
 from app.services.seed import seed_incidents
+from app.services.migrate import run_migrate
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -22,6 +23,8 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     # 1. 建表
     Base.metadata.create_all(bind=engine)
+    # 1b. 数据库迁移 (幂等: 加 occurred_at 列 + 回填存量发生时间, 失败不阻断启动)
+    run_migrate(engine)
     # 2. 首次启动填充历史事件
     db = SessionLocal()
     try:

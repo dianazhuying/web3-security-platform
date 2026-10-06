@@ -23,6 +23,8 @@ def list_incidents(
     category: Optional[str] = Query(default=None, description="风险大类, 对应 risk_class, 如: 网络安全运营风险 / 私钥泄露"),
     status: Optional[str] = Query(default=None, description="事件状态: " + " / ".join(STATUSES) + ", 传 ALL 或省略表示全部"),
     q: Optional[str] = Query(default=None, description="关键词, 匹配标题/项目名/公链"),
+    year: Optional[int] = Query(default=None, ge=2000, le=2100, description="按事件发生年份过滤, e.g. 2023"),
+    month: Optional[int] = Query(default=None, ge=1, le=12, description="按事件发生月份过滤, e.g. 5"),
     page: int = Query(default=1, ge=1, description="页码, 从 1 开始"),
     page_size: int = Query(default=20, ge=1, le=100, description="每页数量"),
     db: Session = Depends(get_db),
@@ -38,6 +40,8 @@ def list_incidents(
         category=category or "ALL",
         status=status or "ALL",
         q=q,
+        year=year,
+        month=month,
         page=page,
         page_size=page_size,
     )

@@ -45,6 +45,7 @@ class Incident(Base):
     sig_val: Mapped[str] = mapped_column(String(128), default="")
     user_advisory: Mapped[str] = mapped_column(Text, default="")
     project_advisory: Mapped[str] = mapped_column(Text, default="")
+    occurred_at: Mapped[Optional[datetime]] = mapped_column(DateTime, index=True, default=_utcnow)  # 事件发生时间(可空)
     fetched_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(

@@ -48,6 +48,7 @@ def build_base_incident(i: int) -> Incident:
         sig_val=f"sig_pattern_{i}_flashloan_or_privkey",
         user_advisory=f"检查对 {p[0]} 的授权状态，暂缓参与该协议极高风险交易。",
         project_advisory="立即暂停相关合约函数，多签隔离权限并配合链上追踪。",
+        occurred_at=BASE_FETCH_TIME,
         fetched_at=BASE_FETCH_TIME,
         trace_links=[
             IncidentTraceLink(
