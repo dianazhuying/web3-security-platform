@@ -11,6 +11,7 @@ import re
 import time
 import urllib.request
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
@@ -20,6 +21,18 @@ from app.models import Incident, IncidentTraceLink
 from app.reference_data import REAL_WORLD_PROJECTS, RISK_CLASSES, SOURCES, STATUSES
 
 logger = logging.getLogger(__name__)
+
+# 最近一次真实数据源失败的异常信息 (供接口诊断)
+_last_source_error: Optional[str] = None
+
+
+def set_last_source_error(msg: Optional[str]) -> None:
+    global _last_source_error
+    _last_source_error = msg
+
+
+def get_last_source_error() -> Optional[str]:
+    return _last_source_error
 
 SOURCE_ORIGIN = "DefiLlama Hacks 公共数据接口 (api.llama.fi/hacks)"
 
@@ -301,6 +314,7 @@ def run_fetch(db: Session) -> tuple[Incident, int, str]:
                         attempt, settings.FETCH_RETRY_TIMES, exc, backoff,
                     )
                     time.sleep(backoff)
+        set_last_source_error(repr(last_exc))
         logger.error(
             "[fetcher] 真实数据源重试 %s 次仍失败, 回退模拟数据源: %s",
             settings.FETCH_RETRY_TIMES, last_exc,

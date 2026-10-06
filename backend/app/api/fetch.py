@@ -6,7 +6,7 @@ from starlette import status as http_status
 from app import schemas
 from app.database import get_db
 from app.services import scheduler
-from app.services.fetcher import run_fetch
+from app.services.fetcher import get_last_source_error, run_fetch
 
 router = APIRouter()
 
@@ -27,6 +27,7 @@ def trigger_fetch(db: Session = Depends(get_db)):
         inserted_count=inserted_count,
         source=source,
         incident=incident,
+        source_error=None if source == "defillama" else get_last_source_error(),
     )
 
 

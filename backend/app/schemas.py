@@ -76,6 +76,7 @@ class FetchResult(BaseModel):
     inserted_count: int
     source: str
     incident: Optional[IncidentOut] = None
+    source_error: Optional[str] = None
 
 
 class FetchStatusOut(BaseModel):
