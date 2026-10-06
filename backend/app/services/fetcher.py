@@ -102,7 +102,11 @@ def _severity_for(amount: float) -> str:
 def _build_from_defillama(row: dict, fetched_at: datetime) -> Incident:
     """把 DefiLlama 单条事件映射为平台 Incident 模型."""
     name = row.get("name") or "未知项目"
-    chain = ",".join(row.get("chain") or []) or "Unknown"
+    # 链集合去重并合并, 截断至 32 字符以适配 PostgreSQL varchar(32) (SQLite 宽松无此限制)
+    chains = [c for c in (row.get("chain") or []) if c and isinstance(c, str)]
+    chain = ",".join(dict.fromkeys(chains)) or "Unknown"
+    if len(chain) > 32:
+        chain = chain[:31] + "…"
     amount = float(row.get("amount") or 0)
     classification = row.get("classification") or "Unknown"
     technique = row.get("technique") or "Unknown"
@@ -111,14 +115,22 @@ def _build_from_defillama(row: dict, fetched_at: datetime) -> Incident:
     defillama_id = row.get("defillamaId") or name
     returned = row.get("returnedFunds")
     risk_class = CLASSIFICATION_MAP.get(classification, "智能合约技术风险")
+    # 嵌入名称/ID 的列统一按 schema 长度截断, 防止 PostgreSQL varchar 严格校验整批回滚
+    def _fit(value: str, limit: int) -> str:
+        value = value or ""
+        return value if len(value) <= limit else value[: limit - 1] + "…"
+
+    external_id = _fit(f"defillama-{defillama_id}", 64)
+    contract_type = _fit(target_type, 128)
+    contract_address = _fit(f"DefiLlama#{defillama_id}", 128)
 
     return Incident(
-        external_id=f"defillama-{defillama_id}",
+        external_id=external_id,
         title=f"{name} 安全事件 ({technique})",
         chain=chain,
         project_name=name,
-        contract_type=target_type,
-        contract_address=f"DefiLlama#{defillama_id}",
+        contract_type=contract_type,
+        contract_address=contract_address,
         loss_amount_text=f"约 {int(amount):,} 美元" if amount else "金额待核",
         loss_usd=amount,
         remark=(
