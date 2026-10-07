@@ -57,6 +57,13 @@ class Incident(Base):
         cascade="all, delete-orphan",
         order_by="IncidentTraceLink.sort_order",
     )
+    # 可信追溯来源集合: dynamic list 便于按可信度/来源类型进行查询与收敛
+    trace_sources: Mapped[list["TraceSource"]] = relationship(
+        back_populates="event",
+        cascade="all, delete-orphan",
+        lazy="dynamic",
+        order_by="TraceSource.reliability_score.desc()",
+    )
     corrections: Mapped[list["IncidentCorrection"]] = relationship(
         back_populates="incident",
         cascade="all, delete-orphan",
@@ -79,6 +86,30 @@ class IncidentTraceLink(Base):
     sort_order: Mapped[int] = mapped_column(Integer, default=0)
 
     incident: Mapped["Incident"] = relationship(back_populates="trace_links")
+
+
+class TraceSource(Base):
+    """事件的可信追溯来源 (多源抓取管道产出, 支持 dynamic list 查询与置信度收敛).
+
+    provider_type: ALERT / POST_MORTEM / FORENSICS / ONCHAIN_EVIDENCE
+    category:      L1 / L2 / L3 / L4 (追溯层级)
+    reliability_score: 该来源与事件匹配的确信度 (0.5 - 1.0)
+    """
+
+    __tablename__ = "trace_sources"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_id: Mapped[int] = mapped_column(
+        ForeignKey("incidents.id", ondelete="CASCADE"), index=True
+    )
+    provider_name: Mapped[str] = mapped_column(String(64), index=True)
+    provider_type: Mapped[str] = mapped_column(String(24), default="")
+    category: Mapped[str] = mapped_column(String(16), default="")
+    title: Mapped[str] = mapped_column(String(256), default="")
+    url: Mapped[str] = mapped_column(String(512), default="")
+    reliability_score: Mapped[float] = mapped_column(Float, default=0.5)
+
+    event: Mapped["Incident"] = relationship(back_populates="trace_sources")
 
 
 class IncidentCorrection(Base):
