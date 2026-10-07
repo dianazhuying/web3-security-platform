@@ -65,4 +65,6 @@ def get_incident(incident_id: int, db: Session = Depends(get_db)) -> Incident:
         raise HTTPException(
             status_code=http_status.HTTP_404_NOT_FOUND, detail="事件不存在"
         )
+    # 物化 dynamic list 的 trace_sources, 供 response_model 序列化
+    incident.trace_sources = incident.trace_sources.all()
     return incident

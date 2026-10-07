@@ -5,6 +5,21 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class TraceSourceOut(BaseModel):
+    """可信追溯来源 (多源抓取管道产出)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    event_id: int
+    provider_name: str
+    provider_type: str
+    category: str
+    title: str
+    url: str
+    reliability_score: float
+
+
 class TraceLinkOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -60,6 +75,7 @@ class IncidentOut(BaseModel):
     project_advisory: str
     fetched_at: datetime
     trace_links: list[TraceLinkOut] = []
+    trace_sources: list[TraceSourceOut] = []
 
 
 class IncidentListResponse(BaseModel):
