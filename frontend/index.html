@@ -501,7 +501,7 @@
                 const amt = Number(item.loss_usd);
                 const moneyText = (Number.isFinite(amt) && amt > 0)
                     ? "💰 损失约 $" + amt.toLocaleString("en-US", { maximumFractionDigits: 0 })
-                    : "损失约 未知";
+                    : "💰 损失约 未知";
                 // 协议类型: 绑定 DefiLlama 目标类型 contract_type, 缺失兜底"未知类型"
                 const contractText = (item.contract_type && String(item.contract_type).trim())
                     ? item.contract_type
