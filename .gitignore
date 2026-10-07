@@ -20,3 +20,6 @@ backend/logs/
 .DS_Store
 .vscode/
 .idea/
+
+# IDE 内部目录
+.trae/
