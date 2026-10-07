@@ -512,24 +512,28 @@
                 if (isBrandNew) activeStyle += " animate-highlightNew";
 
                 const severityBadge = item.severity === "极高"
-                    ? '<span class="text-[10px] bg-gold/10 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-medium">极高</span>'
-                    : '<span class="text-[10px] bg-[#F3F4F6] text-inkSecondary border border-line px-1.5 py-0.5 rounded font-medium">高</span>';
-
+                    ? '<span class="text-[10px] bg-gold/10 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-medium shrink-0">极高</span>'
+                    : '<span class="text-[10px] bg-[#F3F4F6] text-inkSecondary border border-line px-1.5 py-0.5 rounded font-medium shrink-0">高</span>';
                 const newIndicator = isBrandNew ? '<span class="text-[9px] bg-gold text-white font-bold px-1 rounded mr-1">NEW</span>' : '';
-                const timePart = item.fetched_at ? fmt(item.fetched_at).split(" ")[1] : "";
+
+                // 损失金额: 缺失时显式标注"未知", 不使用任何文本相似度推断
+                const amt = Number(item.loss_usd);
+                const moneyText = (Number.isFinite(amt) && amt > 0)
+                    ? "💰 损失约 $" + amt.toLocaleString("en-US", { maximumFractionDigits: 0 })
+                    : "损失约 未知";
 
                 return `
-                    <div onclick="selectIncident(${item.id})" class="p-2.5 rounded-lg border transition cursor-pointer space-y-1 ${activeStyle}">
+                    <div onclick="selectIncident(${item.id})" class="p-2.5 rounded-lg border transition cursor-pointer space-y-1.5 ${activeStyle}">
                         ${isSelected ? '<span class="absolute left-0 top-0 h-full w-0.5 bg-gold"></span>' : ''}
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] text-inkMuted flex items-center">${newIndicator} ${item.chain} · ${timePart}</span>
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-xs font-semibold leading-snug line-clamp-1 min-w-0">${newIndicator}事件：${item.title}</span>
                             ${severityBadge}
                         </div>
-                        <div class="text-xs font-semibold leading-snug line-clamp-1">${item.title}</div>
-                        <div class="text-[10px] text-inkMuted flex justify-between items-center pt-0.5">
-                            <span class="text-inkSecondary font-medium">${item.project_name}</span>
-                            <span class="text-gold/90 font-mono">${item.status}</span>
+                        <div class="flex justify-between items-center gap-2 text-[10px]">
+                            <span class="text-inkMuted truncate min-w-0">项目：<span class="text-inkSecondary font-medium">${item.project_name}</span>　│　协议：<span class="text-inkSecondary font-medium">${item.risk_class}</span></span>
+                            <span class="text-gold/90 font-mono shrink-0">${item.status}</span>
                         </div>
+                        <div class="text-[10px] text-inkMuted">${moneyText}</div>
                     </div>
                 `;
             }).join("");
