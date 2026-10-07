@@ -29,11 +29,24 @@ def run_fetch_job() -> None:
     db = SessionLocal()
     try:
         incident, inserted_count, source = run_fetch(db)
+        # 追加可信追溯管道: 抓取/匹配来源 + 智能处置建议收敛 (均不写盖人工纠错)
+        trace_detail = ""
+        try:
+            from app.services.trace.pipeline import run_trace_pipeline
+            from app.services.convergence import converge_incidents
+            t = run_trace_pipeline(db)
+            c = converge_incidents(db)
+            trace_detail = (
+                f" 追踪:插入源{t['inserted']}/跳过{t['skipped_existing']}"
+                f" 收敛:用户建议{c['user_generated']}/项目建议{c['project_generated']}/纠错保护{c['blocked']}"
+            )
+        except Exception:  # noqa: BLE001 - 追溯/收敛失败不影响抓取主流程
+            logger.exception("[scheduler] 追溯管道/收敛引擎执行异常")
         duration = time.perf_counter() - started
         _last_run.update(
             status="ok",
             at=datetime.now(timezone.utc),
-            detail=f"{source}: 新入库 {inserted_count} 起, 代表事件 {incident.external_id}",
+            detail=f"{source}: 新入库 {inserted_count} 起, 代表事件 {incident.external_id}{trace_detail}",
         )
         logger.info(
             "[scheduler] 定时抓取完成 source=%s inserted=%s event=%s 耗时=%.1fs",
