@@ -374,6 +374,21 @@
             el._timer = setTimeout(() => { el.style.display = "none"; }, 3000);
         }
 
+        // ===================== 点击复制 (data-copy 委托, 阻止冒泡不触发选中) =====================
+        document.addEventListener("click", async (e) => {
+            const el = e.target.closest("[data-copy]");
+            if (!el) return;
+            e.stopPropagation();
+            const txt = el.getAttribute("data-copy") || "";
+            if (!txt) return;
+            try {
+                await navigator.clipboard.writeText(txt);
+                showToast(`已复制: ${txt.slice(0, 48)}${txt.length > 48 ? "..." : ""}`, "success");
+            } catch {
+                showToast("复制失败", "error");
+            }
+        });
+
         // ===================== 状态 =====================
         let incidentList = [];       // 已加载的事件(摘要)
         let listTotal = 0;           // 服务端总数
@@ -497,14 +512,25 @@
                     <div onclick="selectIncident(${item.id})" class="p-2.5 rounded-lg border transition cursor-pointer space-y-1.5 overflow-hidden ${activeStyle}">
                         ${isSelected ? '<span class="absolute left-0 top-0 h-full w-0.5 bg-gold"></span>' : ''}
                         <div class="flex justify-between items-center gap-2">
-                            <span class="text-xs font-semibold leading-snug flex-1 min-w-0 truncate" title="${item.title}">${newIndicator}事件：${item.title}</span>
+                            <span class="text-xs font-semibold leading-snug flex-1 min-w-0 max-w-[260px] truncate" title="${item.title}" data-copy="${item.title}">${newIndicator}事件：${item.title}</span>
                             ${severityBadge}
                         </div>
                         <div class="flex items-center justify-between gap-2 text-[10px]">
-                            <span class="text-inkMuted truncate min-w-0 flex-1" title="${item.project_name}">项目：<span class="text-inkSecondary font-medium">${item.project_name}</span>　│　${moneyText}</span>
+                            <span class="flex items-center min-w-0 flex-1">
+                                <span class="text-inkMuted shrink-0">项目：</span>
+                                <span class="text-inkSecondary font-medium max-w-[130px] truncate" title="${item.project_name}" data-copy="${item.project_name}">${item.project_name}</span>
+                                <span class="text-inkMuted shrink-0">　│　</span>
+                                <span class="text-inkSecondary font-medium whitespace-nowrap shrink-0" style="flex-shrink:0;">${moneyText}</span>
+                            </span>
                             <span class="text-gold/90 font-mono whitespace-nowrap shrink-0" style="flex-shrink:0; margin-left:8px;">${item.status}</span>
                         </div>
-                        <div class="text-[10px] text-inkMuted truncate min-w-0 flex-1" title="${item.chain} | ${contractText}">公链：<span class="text-inkSecondary font-medium">${item.chain}</span>　│　协议：<span class="text-inkSecondary font-medium">${contractText}</span></div>
+                        <div class="flex items-center text-[10px] min-w-0 flex-1">
+                            <span class="text-inkMuted shrink-0">公链：</span>
+                            <span class="text-inkSecondary font-medium max-w-[100px] truncate" title="${item.chain}" data-copy="${item.chain}">${item.chain}</span>
+                            <span class="text-inkMuted shrink-0">　│　</span>
+                            <span class="text-inkMuted shrink-0">协议：</span>
+                            <span class="text-inkSecondary font-medium max-w-[100px] truncate" title="${contractText}" data-copy="${contractText}">${contractText}</span>
+                        </div>
                     </div>
                 `;
             }).join("");
