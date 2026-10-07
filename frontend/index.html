@@ -163,10 +163,10 @@
             </div>
 
             <!-- 主分析区: 左侧事件列表 + 右侧深度分析面板 -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+            <div class="grid grid-cols-1 gap-5 lg:flex lg:items-start">
 
-                <!-- 左侧: 事件列表 -->
-                <div class="lg:col-span-4 bg-panel border border-line rounded-xl p-5 flex flex-col min-h-[560px]">
+                <!-- 左侧: 事件列表 (固定宽度 380px, 为卡片提供充裕空间) -->
+                <div class="lg:w-[380px] lg:min-w-[380px] lg:flex-none bg-panel border border-line rounded-xl p-5 flex flex-col min-h-[560px]">
                     <div class="flex items-center justify-between border-b border-line pb-3 mb-4 shrink-0">
                         <h2 class="text-sm font-bold text-inkPrimary flex items-center gap-2">
                             <i data-lucide="database" class="w-4 h-4 text-gold"></i> 最新安全事件
@@ -195,8 +195,8 @@
                     </div>
                 </div>
 
-                <!-- 右侧: 模块化深度分析面板 -->
-                <div class="lg:col-span-8 bg-panel border border-line rounded-xl p-6 space-y-5" id="reportCard">
+                <!-- 右侧: 模块化深度分析面板 (占据左侧外的剩余宽度) -->
+                <div class="flex-1 min-w-0 bg-panel border border-line rounded-xl p-6 space-y-5" id="reportCard">
 
                     <!-- 模块 1: Header 与状态 -->
                     <div class="flex flex-wrap justify-between items-start gap-4 border-b border-line pb-4">
@@ -486,25 +486,20 @@
                 // 损失金额: 缺失时显式标注"未知", 不使用任何文本相似度推断
                 const amt = Number(item.loss_usd);
                 const moneyText = (Number.isFinite(amt) && amt > 0)
-                    ? "💰 损失约 $" + amt.toLocaleString("en-US", { maximumFractionDigits: 0 })
-                    : "损失约 未知";
-                // 协议类型: 绑定 DefiLlama 目标类型 contract_type, 缺失兜底"未知类型"
-                const contractText = (item.contract_type && String(item.contract_type).trim())
-                    ? item.contract_type
-                    : "未知类型";
+                    ? "💰 $" + amt.toLocaleString("en-US", { maximumFractionDigits: 0 })
+                    : "未知";
 
                 return `
                     <div onclick="selectIncident(${item.id})" class="p-2.5 rounded-lg border transition cursor-pointer space-y-1.5 ${activeStyle}">
                         ${isSelected ? '<span class="absolute left-0 top-0 h-full w-0.5 bg-gold"></span>' : ''}
                         <div class="flex justify-between items-center gap-2">
-                            <span class="text-xs font-semibold leading-snug line-clamp-1 min-w-0">${newIndicator}事件：${item.title}</span>
+                            <span class="text-xs font-semibold leading-snug line-clamp-1 flex-1 min-w-0 truncate">${newIndicator}事件：${item.title}</span>
                             ${severityBadge}
                         </div>
-                        <div class="flex justify-between items-center gap-2 text-[10px]">
-                            <span class="text-inkMuted truncate min-w-0">项目：<span class="text-inkSecondary font-medium">${item.project_name}</span>　│　公链：<span class="text-inkSecondary font-medium">${item.chain}</span>　│　协议：<span class="text-inkSecondary font-medium">${contractText}</span></span>
-                            <span class="text-gold/90 font-mono shrink-0">${item.status}</span>
+                        <div class="flex items-center justify-between gap-2 text-[10px]">
+                            <span class="text-inkMuted truncate min-w-0">项目：<span class="text-inkSecondary font-medium">${item.project_name}</span>　│　损失：<span class="text-inkSecondary font-medium">${moneyText}</span></span>
+                            <span class="text-gold/90 font-mono shrink-0" style="flex-shrink:0; margin-left:8px;">${item.status}</span>
                         </div>
-                        <div class="text-[10px] text-inkMuted">${moneyText}</div>
                     </div>
                 `;
             }).join("");
