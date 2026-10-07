@@ -200,15 +200,8 @@
                     <!-- 模块 1: Header 与状态 -->
                     <div class="flex flex-wrap justify-between items-start gap-4 border-b border-line pb-4">
                         <div>
-                            <div class="flex items-center gap-2 mb-2">
-                                <span id="riskBadge" class="bg-gold/10 text-gold border border-gold/30 text-xs px-2.5 py-0.5 rounded-full font-semibold">严重度: --</span>
-                                <span id="statusBadge" class="bg-[#F3F4F6] text-inkSecondary border border-line text-xs px-2.5 py-0.5 rounded-full font-semibold">事件状态: --</span>
-                                <span id="chainTag" class="bg-transparent text-inkSecondary border border-line text-xs px-2.5 py-0.5 rounded-full font-mono font-medium">--</span>
-                            </div>
                             <h3 id="eventTitle" class="text-lg font-bold text-inkPrimary">加载中...</h3>
-                            <p id="eventTime" class="text-xs text-inkMuted mt-1.5">事件抓取时间: --</p>
                         </div>
-                        <button onclick="submitCorrection()" class="text-xs border border-gold/40 text-gold hover:bg-gold hover:text-white font-medium px-3 py-1.5 rounded-lg transition shrink-0">提交纠错</button>
                     </div>
 
                     <!-- 模块 2: 报道出处锚点卡片 -->
@@ -543,11 +536,6 @@
                 const d = await apiGet(`/incidents/${id}`);
 
                 document.getElementById("eventTitle").innerText = d.title;
-                document.getElementById("eventTime").innerText = `事件抓取时间: ${fmt(d.fetched_at)} | 链上交易日志完整匹配`;
-                document.getElementById("chainTag").innerText = d.chain;
-                document.getElementById("riskBadge").innerText = "严重度: " + d.severity;
-                document.getElementById("statusBadge").innerText = "事件状态: " + d.status;
-
                 document.getElementById("eventSourceOrigin").innerText = d.source_origin;
 
                 // 核心合约/程序地址: 整合进"攻击特征"区; 真实地址跳链上浏览器, 占位地址原样展示
