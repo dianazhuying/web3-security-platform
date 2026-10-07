@@ -40,6 +40,7 @@ class IncidentSummary(BaseModel):
     title: str
     chain: str
     project_name: str
+    contract_type: str
     severity: str
     status: str
     risk_class: str
