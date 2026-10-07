@@ -149,13 +149,13 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
                 <div class="relative">
-                    <select id="reportFilter" onchange="filterIncidents()" title="按可信追溯报告的凭证完整度筛选：完整度 = L1 数据源 / L2 分类标签 / L3 攻击技术与复盘 / L4 链上凭证 中等存在可点击链接的层数。" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
-                        <option value="ALL">全部等级</option>
-                        <option value="none">无可信追溯</option>
-                        <option value="g1">报告 ≥1 级</option>
-                        <option value="g2">报告 ≥2 级</option>
-                        <option value="g3">报告 ≥3 级</option>
-                        <option value="g4">报告完整 4 级</option>
+                    <select id="reportFilter" onchange="filterIncidents()" title="按事件具备的信源等级筛选：L0 未验证信源(社区/传闻) · L1 基础 API 数据(DefiLlama 等) · L2 项目方/媒体确认 · L3 安全机构分析报告 · L4 链上交易凭证复现。选择某级 = 显示达到该等级及以上的事件。" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
+                        <option value="ALL">全部信源等级</option>
+                        <option value="0" title="社区/传闻等未经验证的信息，可信度最低">L0 - 未验证信源 (社区/传闻)</option>
+                        <option value="1" title="DefiLlama 等公开 API 提供的原始数据">L1 - 基础 API 数据 (DefiLlama 等)</option>
+                        <option value="2" title="项目方公告或媒体确认的报道">L2 - 项目方/媒体确认</option>
+                        <option value="3" title="安全机构发布的深度分析报告">L3 - 安全机构分析报告</option>
+                        <option value="4" title="链上交易凭证，可复现验证">L4 - 链上交易凭证复现</option>
                     </select>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>

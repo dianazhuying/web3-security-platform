@@ -6,8 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.models import Incident, IncidentTraceLink
 
-# 追溯报告完整度筛选: 按 L1-L4 中存在可点击链接(url非空)的等级数 (0-4)
-VALID_REPORT = {"none": 0, "g1": 1, "g2": 2, "g3": 3, "g4": 4}
+# 信源等级筛选: 按 L1-L4 中存在可点击链接(url非空)的等级数 (0-4)
+# 键 "0"-"4" 对应前端 L0-L4 语义 (L0=无可点击信源/未验证, Ln=达到该等级及以上);
+# 旧键 none/g1-g4 保留兼容。
+VALID_REPORT = {"none": 0, "g1": 1, "g2": 2, "g3": 3, "g4": 4, "0": 0, "1": 1, "2": 2, "3": 3, "4": 4}
 
 
 def list_incidents(
