@@ -232,40 +232,6 @@
                         </div>
                     </div>
 
-                    <!-- 模块 3: 受影响项目履历与合约元数据 -->
-                    <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-3">
-                        <div class="text-xs font-semibold text-inkPrimary flex items-center gap-1.5 border-b border-line pb-2">
-                            <i data-lucide="database" class="w-4 h-4 text-gold"></i> 基础信息
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                            <div>
-                                <span class="text-inkMuted block text-[11px]">真实项目名称</span>
-                                <span class="text-inkPrimary font-semibold text-sm" id="metaProjectName">--</span>
-                            </div>
-                            <div>
-                                <span class="text-inkMuted block text-[11px]">公链 (Chain)</span>
-                                <span class="text-inkSecondary font-medium" id="metaChain">--</span>
-                            </div>
-                            <div>
-                                <span class="text-inkMuted block text-[11px]">合约/协议类型</span>
-                                <span class="text-inkSecondary font-medium" id="metaContractType">--</span>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs pt-1 border-t border-line">
-                            <div>
-                                <span class="text-inkMuted block text-[11px]">核心合约/程序地址</span>
-                                <span class="font-mono text-gold/90 break-all font-medium" id="metaContractAddress">--</span>
-                            </div>
-                            <div>
-                                <span class="text-inkMuted block text-[11px]">损失金额与备注</span>
-                                <div class="font-medium mt-0.5 flex items-center flex-wrap gap-x-2">
-                                    <span class="text-gold font-bold" id="metaLossAmount">--</span>
-                                    <span class="text-inkMuted border-l border-line pl-2" id="metaRemark">--</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- 模块 4: 风险大类 / 攻击根因 / 攻击特征 -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-2">
@@ -286,6 +252,7 @@
                             </div>
                             <div class="text-xs text-inkSecondary font-medium" id="sigDescription">--</div>
                             <div class="text-xs text-inkMuted font-mono bg-[#F9FAFB] p-2.5 rounded border border-line" id="sigValues">--</div>
+                            <div class="flex items-start justify-between gap-2 text-xs" id="contractAddressRow" style="display:none"></div>
                         </div>
                     </div>
 
@@ -534,7 +501,7 @@
                             ${severityBadge}
                         </div>
                         <div class="flex justify-between items-center gap-2 text-[10px]">
-                            <span class="text-inkMuted truncate min-w-0">项目：<span class="text-inkSecondary font-medium">${item.project_name}</span>　│　协议：<span class="text-inkSecondary font-medium">${contractText}</span></span>
+                            <span class="text-inkMuted truncate min-w-0">项目：<span class="text-inkSecondary font-medium">${item.project_name}</span>　│　公链：<span class="text-inkSecondary font-medium">${item.chain}</span>　│　协议：<span class="text-inkSecondary font-medium">${contractText}</span></span>
                             <span class="text-gold/90 font-mono shrink-0">${item.status}</span>
                         </div>
                         <div class="text-[10px] text-inkMuted">${moneyText}</div>
@@ -558,13 +525,18 @@
 
                 document.getElementById("eventSourceOrigin").innerText = d.source_origin;
 
-                document.getElementById("metaProjectName").innerText = d.project_name;
-                document.getElementById("metaChain").innerText = d.chain;
-                document.getElementById("metaContractType").innerText = d.contract_type;
-                document.getElementById("metaContractAddress").innerText = d.contract_address;
-
-                document.getElementById("metaLossAmount").innerText = `损失${d.loss_amount_text}`;
-                document.getElementById("metaRemark").innerText = d.remark;
+                // 核心合约/程序地址: 整合进"攻击特征"区; 真实地址跳链上浏览器, 占位地址原样展示
+                const caRaw = d.contract_address || "";
+                const caRow = document.getElementById("contractAddressRow");
+                const caLabel = '<span class="text-inkMuted shrink-0">核心合约/程序地址</span>';
+                if (caRaw && /^0x[a-fA-F0-9]{40}$/.test(caRaw)) {
+                    const base = d.chain === "BSC" ? "https://bscscan.com/address/" : "https://etherscan.io/address/";
+                    caRow.innerHTML = caLabel + `<a href="${base}${caRaw}" target="_blank" rel="noopener noreferrer" class="font-mono text-gold/90 hover:text-gold break-all min-w-0">${caRaw}</a>`;
+                    caRow.style.display = "flex";
+                } else if (caRaw) {
+                    caRow.innerHTML = caLabel + `<span class="font-mono text-inkSecondary break-all min-w-0">${caRaw}</span>`;
+                    caRow.style.display = "flex";
+                }
 
                 const traceContainer = document.getElementById("traceabilityLinksContainer");
                 // 动态多源展示: 优先新管道 trace_sources(按来源聚合), 回退旧 trace_links; 均只渲染 url 有效的
