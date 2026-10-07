@@ -494,17 +494,17 @@
                     : "未知类型";
 
                 return `
-                    <div onclick="selectIncident(${item.id})" class="p-2.5 rounded-lg border transition cursor-pointer space-y-1.5 ${activeStyle}">
+                    <div onclick="selectIncident(${item.id})" class="p-2.5 rounded-lg border transition cursor-pointer space-y-1.5 overflow-hidden ${activeStyle}">
                         ${isSelected ? '<span class="absolute left-0 top-0 h-full w-0.5 bg-gold"></span>' : ''}
                         <div class="flex justify-between items-center gap-2">
-                            <span class="text-xs font-semibold leading-snug line-clamp-1 flex-1 min-w-0 truncate">${newIndicator}事件：${item.title}</span>
+                            <span class="text-xs font-semibold leading-snug flex-1 min-w-0 truncate" title="${item.title}">${newIndicator}事件：${item.title}</span>
                             ${severityBadge}
                         </div>
                         <div class="flex items-center justify-between gap-2 text-[10px]">
-                            <span class="text-inkMuted truncate min-w-0 flex-1">项目：<span class="text-inkSecondary font-medium">${item.project_name}</span>　│　${moneyText}</span>
-                            <span class="text-gold/90 font-mono shrink-0" style="flex-shrink:0; margin-left:8px;">${item.status}</span>
+                            <span class="text-inkMuted truncate min-w-0 flex-1" title="${item.project_name}">项目：<span class="text-inkSecondary font-medium">${item.project_name}</span>　│　${moneyText}</span>
+                            <span class="text-gold/90 font-mono whitespace-nowrap shrink-0" style="flex-shrink:0; margin-left:8px;">${item.status}</span>
                         </div>
-                        <div class="text-[10px] text-inkMuted truncate min-w-0 flex-1">公链：<span class="text-inkSecondary font-medium">${item.chain}</span>　│　协议：<span class="text-inkSecondary font-medium">${contractText}</span></div>
+                        <div class="text-[10px] text-inkMuted truncate min-w-0 flex-1" title="${item.chain} | ${contractText}">公链：<span class="text-inkSecondary font-medium">${item.chain}</span>　│　协议：<span class="text-inkSecondary font-medium">${contractText}</span></div>
                     </div>
                 `;
             }).join("");
