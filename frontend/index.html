@@ -137,17 +137,8 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
                 <div class="relative">
-                    <select id="ecosystemFilter" onchange="onEcosystemChange()" title="按生态分类筛选: 以太坊生态 / Solana生态 / 其他生态" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
-                        <option value="ALL">全部生态</option>
-                        <option value="EVM">以太坊生态</option>
-                        <option value="SOLANA">Solana生态</option>
-                        <option value="OTHER">其他生态</option>
-                    </select>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                </div>
-                <div class="relative">
-                    <select id="chainFilter" onchange="filterIncidents()" title="按公链筛选事件" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
-                        <option value="ALL">全部公链</option>
+                    <select id="chainFilter" onchange="onChainFilterChange()" title="先按生态分类，再选具体公链" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
+                        <option value="ALL">全部生态 · 全部公链</option>
                     </select>
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
@@ -427,29 +418,50 @@
             fillChainFilter();
         }
 
-        // 按当前生态填充公链下拉; 生态切换时重置公链为全部
-        function fillChainFilter(ecosystem = "ALL") {
+        // 填充「生态/公链」分组下拉: 每生态一个 optgroup, 组首为"该生态全部", 其后为该生态内具体公链
+        const ECOSYSTEM_GROUPS = [
+            { key: "EVM", label: "以太坊生态" },
+            { key: "SOLANA", label: "Solana生态" },
+            { key: "OTHER", label: "其他生态" },
+        ];
+        const ECOSENTINEL = "__eco:"; // 哨兵值前缀, value=__eco:EVM 表示"以太坊生态全部公链"
+        function fillChainFilter() {
             const sel = document.getElementById("chainFilter");
-            sel.innerHTML = '<option value="ALL">全部公链</option>';
-            const qs = {};
-            if (ecosystem !== "ALL") qs.ecosystem = ecosystem;
-            apiGet("/chains", qs).then((chains) => {
-                (chains || []).forEach((c) => {
-                    const op = document.createElement("option");
-                    op.value = c;
-                    op.textContent = c;
-                    sel.appendChild(op);
-                });
-            }).catch(() => {});
+            sel.innerHTML = '';
+            const all = document.createElement("option");
+            all.value = "ALL";
+            all.textContent = "全部生态 · 全部公链";
+            sel.appendChild(all);
+            ECOSYSTEM_GROUPS.forEach((g) => {
+                apiGet("/chains", { ecosystem: g.key }).then((chains) => {
+                    if (!sel) return;
+                    const og = document.createElement("optgroup");
+                    og.label = g.label;
+                    const head = document.createElement("option");
+                    head.value = ECOSENTINEL + g.key;
+                    head.textContent = g.label + " · 全部公链";
+                    og.appendChild(head);
+                    (chains || []).forEach((c) => {
+                        const op = document.createElement("option");
+                        op.value = c;
+                        op.textContent = c;
+                        og.appendChild(op);
+                    });
+                    sel.appendChild(og);
+                }).catch(() => {});
+            });
         }
 
-        function onEcosystemChange() {
-            const eco = document.getElementById("ecosystemFilter").value;
-            currentFilters.ecosystem = eco;
-            // 生态变化时联动刷新公链下拉并重置公链选择
-            document.getElementById("chainFilter").value = "ALL";
-            currentFilters.chain = "ALL";
-            fillChainFilter(eco);
+        // 生态/公链分组下拉变更: 解析哨兵值(生态所有)或具体公链
+        function onChainFilterChange() {
+            const v = document.getElementById("chainFilter").value;
+            if (v.startsWith(ECOSENTINEL)) {
+                currentFilters.ecosystem = v.slice(ECOSENTINEL.length);
+                currentFilters.chain = "ALL";
+            } else {
+                currentFilters.ecosystem = "ALL";
+                currentFilters.chain = v;
+            }
             filterIncidents();
         }
 
@@ -503,8 +515,6 @@
             currentFilters.category = document.getElementById("riskCategoryFilter").value;
             currentFilters.status = document.getElementById("statusFilter").value;
             currentFilters.q = document.getElementById("searchInput").value.toLowerCase().trim();
-            currentFilters.ecosystem = document.getElementById("ecosystemFilter").value;
-            currentFilters.chain = document.getElementById("chainFilter").value;
             currentFilters.year = document.getElementById("yearFilter").value;
             currentFilters.month = document.getElementById("monthFilter").value;
             currentFilters.report = document.getElementById("reportFilter").value;
