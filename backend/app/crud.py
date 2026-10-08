@@ -18,6 +18,7 @@ def list_incidents(
     category: str = "ALL",
     status: str = "ALL",
     q: Optional[str] = None,
+    chain: Optional[str] = None,
     year: Optional[int] = None,
     month: Optional[int] = None,
     report: Optional[str] = None,
@@ -41,6 +42,17 @@ def list_incidents(
                 Incident.title.ilike(pattern),
                 Incident.project_name.ilike(pattern),
                 Incident.chain.ilike(pattern),
+            )
+        )
+    if chain:
+        # 公链筛选: chain 为逗号拼接的多链字符串, 精确等于 或 作为集合成员被包含
+        c = chain.strip()
+        filters.append(
+            or_(
+                Incident.chain == c,
+                Incident.chain.like(f"{c},%"),
+                Incident.chain.like(f"%,{c}"),
+                Incident.chain.like(f"%,{c},%"),
             )
         )
     if report:
@@ -70,3 +82,24 @@ def list_incidents(
     ).all()
 
     return total, items
+
+
+def get_chains(db: Session, limit: int = 30) -> list[str]:
+    """返回事件中涉及的独立公链列表 (按事件数倒序, 取前 limit 条).
+
+    chain 字段为逗号拼接的多链字符串, 需拆分后按单个公链聚合计数.
+    """
+    rows = db.execute(
+        select(func.count().label("cnt"), Incident.chain)
+        .where(Incident.chain.isnot(None), Incident.chain != "")
+        .group_by(Incident.chain)
+        .order_by(func.count().desc())
+    ).all()
+    counts: dict[str, int] = {}
+    for row in rows:
+        for part in row.chain.split(","):
+            p = part.strip()
+            if p:
+                counts[p] = counts.get(p, 0) + 1
+    top = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    return [name for name, _n in top[:limit]]

@@ -14,6 +14,14 @@ from app.reference_data import STATUSES
 router = APIRouter()
 
 
+@router.get("/chains", summary="获取事件涉及的独立公链列表 (按事件数倒序, 供筛选下拉)")
+def chains(
+    limit: int = Query(default=30, ge=1, le=100),
+    db: Session = Depends(get_db),
+) -> list[str]:
+    return crud.get_chains(db, limit=limit)
+
+
 @router.get(
     "/incidents",
     response_model=schemas.IncidentListResponse,
@@ -23,6 +31,7 @@ def list_incidents(
     category: Optional[str] = Query(default=None, description="风险大类, 对应 risk_class, 如: 网络安全运营风险 / 私钥泄露"),
     status: Optional[str] = Query(default=None, description="事件状态: " + " / ".join(STATUSES) + ", 传 ALL 或省略表示全部"),
     q: Optional[str] = Query(default=None, description="关键词, 匹配标题/项目名/公链"),
+    chain: Optional[str] = Query(default=None, description="公链筛选, 如 Ethereum/BSC/Solana, 匹配该链或其多链组合成员",),
     year: Optional[int] = Query(default=None, ge=2000, le=2100, description="按事件发生年份过滤, e.g. 2023"),
     month: Optional[int] = Query(default=None, ge=1, le=12, description="按事件发生月份过滤, e.g. 5"),
     report: Optional[str] = Query(default=None, description="按可信追溯报告完整度过滤: none=无链接, g1/g2/g3=至少N级, g4=完整4级"),
@@ -41,6 +50,7 @@ def list_incidents(
         category=category or "ALL",
         status=status or "ALL",
         q=q,
+        chain=chain,
         year=year,
         month=month,
         report=report,

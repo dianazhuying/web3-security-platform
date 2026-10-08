@@ -137,6 +137,12 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
                 </div>
                 <div class="relative">
+                    <select id="chainFilter" onchange="filterIncidents()" title="按公链筛选事件" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
+                        <option value="ALL">全部公链</option>
+                    </select>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5 text-gold absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </div>
+                <div class="relative">
                     <select id="yearFilter" onchange="filterIncidents()" class="appearance-none bg-panel border border-line text-inkSecondary text-xs rounded-md pl-3 pr-8 py-2 cursor-pointer focus:border-gold/50 focus:outline-none transition [&>option]:bg-panel [&>option]:text-inkSecondary">
                         <option value="ALL">全部年份</option>
                     </select>
@@ -389,7 +395,7 @@
         let loadingList = false;
         let searchTimer = null;
         let chart = null;
-        const currentFilters = { category: "ALL", status: "ALL", q: "", year: "ALL", month: "ALL", report: "ALL" };
+        const currentFilters = { category: "ALL", status: "ALL", q: "", chain: "ALL", year: "ALL", month: "ALL", report: "ALL" };
 
         // 填充年份(2013~当前)与月份(1-12月)下拉选项
         function initPeriodFilters() {
@@ -408,6 +414,16 @@
                 op.textContent = m + "月";
                 monthSel.appendChild(op);
             }
+            // 填充公链下拉 (取自 /chains 接口)
+            apiGet("/chains").then((chains) => {
+                const sel = document.getElementById("chainFilter");
+                (chains || []).forEach((c) => {
+                    const op = document.createElement("option");
+                    op.value = c;
+                    op.textContent = c;
+                    sel.appendChild(op);
+                });
+            }).catch(() => {});
         }
 
         // ===================== 事件列表 (服务端加载 + 分页) =====================
@@ -420,6 +436,7 @@
                 if (currentFilters.category !== "ALL") params.category = currentFilters.category;
                 if (currentFilters.status !== "ALL") params.status = currentFilters.status;
                 if (currentFilters.q) params.q = currentFilters.q;
+                if (currentFilters.chain !== "ALL") params.chain = currentFilters.chain;
                 if (currentFilters.year !== "ALL") params.year = currentFilters.year;
                 if (currentFilters.month !== "ALL") params.month = currentFilters.month;
                 if (currentFilters.report !== "ALL") params.report = currentFilters.report;
@@ -458,6 +475,7 @@
             currentFilters.category = document.getElementById("riskCategoryFilter").value;
             currentFilters.status = document.getElementById("statusFilter").value;
             currentFilters.q = document.getElementById("searchInput").value.toLowerCase().trim();
+            currentFilters.chain = document.getElementById("chainFilter").value;
             currentFilters.year = document.getElementById("yearFilter").value;
             currentFilters.month = document.getElementById("monthFilter").value;
             currentFilters.report = document.getElementById("reportFilter").value;
