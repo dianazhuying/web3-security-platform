@@ -432,22 +432,25 @@
             all.value = "ALL";
             all.textContent = "全部生态 · 全部公链";
             sel.appendChild(all);
-            ECOSYSTEM_GROUPS.forEach((g) => {
+            // 先按数组顺序创建空 optgroup(固定分组次序), 再并发填充各生态成员
+            const inserted = ECOSYSTEM_GROUPS.map((g) => {
+                const og = document.createElement("optgroup");
+                og.label = g.label;
+                const head = document.createElement("option");
+                head.value = ECOSENTINEL + g.key;
+                head.textContent = g.label + " · 全部公链";
+                og.appendChild(head);
+                sel.appendChild(og);
+                return { g, og };
+            });
+            inserted.forEach(({ g, og }) => {
                 apiGet("/chains", { ecosystem: g.key }).then((chains) => {
-                    if (!sel) return;
-                    const og = document.createElement("optgroup");
-                    og.label = g.label;
-                    const head = document.createElement("option");
-                    head.value = ECOSENTINEL + g.key;
-                    head.textContent = g.label + " · 全部公链";
-                    og.appendChild(head);
                     (chains || []).forEach((c) => {
                         const op = document.createElement("option");
                         op.value = c;
                         op.textContent = c;
                         og.appendChild(op);
                     });
-                    sel.appendChild(og);
                 }).catch(() => {});
             });
         }
