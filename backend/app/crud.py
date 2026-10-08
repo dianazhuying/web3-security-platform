@@ -147,5 +147,5 @@ def get_chains(db: Session, limit: int = 30, ecosystem: Optional[str] = None) ->
         counts = {k: v for k, v in counts.items() if k in mem}
     elif ecosystem == "OTHER":
         counts = {k: v for k, v in counts.items() if k not in EVM_CHAINS and k not in SOLANA_CHAINS}
-    top = sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+    top = sorted(counts.items(), key=lambda kv: (kv[0].casefold(), kv[0]))
     return [name for name, _n in top[:limit]]
