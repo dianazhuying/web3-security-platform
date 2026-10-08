@@ -137,8 +137,10 @@ def get_chains(db: Session, limit: int = 30, ecosystem: Optional[str] = None) ->
     for row in rows:
         for part in row.chain.split(","):
             p = part.strip()
-            if p:
-                counts[p] = counts.get(p, 0) + 1
+            if not p or "…" in p or len(p) < 2:
+                # 滤除源数据残缺链名 (含省略号/单字符碎片), 避免污染公链下拉
+                continue
+            counts[p] = counts.get(p, 0) + 1
     # 生态过滤(在拆分后的单链层面): 只保留属于目标生态的链
     if ecosystem in ("EVM", "SOLANA"):
         mem = EVM_CHAINS if ecosystem == "EVM" else SOLANA_CHAINS
