@@ -1,7 +1,7 @@
 """数据库查询封装."""
 from typing import Optional
 
-from sqlalchemy import and_, extract, func, or_, select
+from sqlalchemy import Integer, and_, exists, extract, func, or_, select
 from sqlalchemy.orm import Session
 
 from app.models import Incident, IncidentTraceLink
@@ -94,16 +94,20 @@ def list_incidents(
     if report:
         target = VALID_REPORT.get(report)
         if target is not None:
-            # 该事件有可点击链接的追溯等级数
-            report_cnt = (
-                select(func.count(func.distinct(IncidentTraceLink.level)))
-                .where(
-                    IncidentTraceLink.incident_id == Incident.id,
-                    IncidentTraceLink.url != "",
+            # 达到所选等级及以上: 该事件存在"等级 >= target"的可点击链接(url 非空)。
+            # level 形如 "L3 深度分析", 首位字符即数字; cast->int 后与 target 比较。
+            # (修复: 不再用去重等级数量, 而是按最大达到等级过滤, 避免 L0 档误用 distinct 计数。
+            #  target=0 时 cast>=0 恒真, 等价于"存在任意非空链接", 即 L0=有信源/未验证。)
+            lvl_num = func.cast(func.substr(IncidentTraceLink.level, 2, 1), Integer)
+            filters.append(
+                exists(
+                    select(1).select_from(IncidentTraceLink).where(
+                        IncidentTraceLink.incident_id == Incident.id,
+                        IncidentTraceLink.url != "",
+                        lvl_num >= target,
+                    )
                 )
-                .scalar_subquery()
             )
-            filters.append(report_cnt == target if target == 0 else report_cnt >= target)
 
     total = db.scalar(
         select(func.count()).select_from(Incident).where(*filters)
