@@ -80,4 +80,12 @@ def get_incident(incident_id: int, db: Session = Depends(get_db)) -> Incident:
         )
     # 物化 dynamic list 的 trace_sources, 供 response_model 序列化
     incident.trace_sources = incident.trace_sources.all()
+    # 注入合约地址捕捉路径是否有效 (供前端展示), 缺失地址也返回 False
+    from app.services.contract_path import resolve_path
+
+    incident.contract_path_valid = (
+        resolve_path(incident.contract_address, incident.chain).status == "valid"
+        if (incident.contract_address or "").strip()
+        else False
+    )
     return incident

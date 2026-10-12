@@ -42,6 +42,12 @@ def run_fetch_job() -> None:
             )
         except Exception:  # noqa: BLE001 - 追溯/收敛失败不影响抓取主流程
             logger.exception("[scheduler] 追溯管道/收敛引擎执行异常")
+        # 合约捕捉路径巡检汇总 (运维诊断, 失败不影响主流程)
+        try:
+            from app.services.contract_path import audit_contract_paths, audit_summary_text
+            logger.info("[scheduler] %s", audit_summary_text(audit_contract_paths(db)))
+        except Exception:  # noqa: BLE001
+            logger.exception("[scheduler] 合约捕捉路径巡检异常")
         duration = time.perf_counter() - started
         _last_run.update(
             status="ok",

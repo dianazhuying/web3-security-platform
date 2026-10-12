@@ -1,5 +1,7 @@
 """抓取接口: 手动触发一次抓取 + 查询定时任务执行状态 (最近日志/下次执行)."""
-from fastapi import APIRouter, Depends
+from typing import Optional
+
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from starlette import status as http_status
 
@@ -38,3 +40,18 @@ def trigger_fetch(db: Session = Depends(get_db)):
 )
 def fetch_status():
     return scheduler.status_snapshot()
+
+
+@router.get(
+    "/admin/contract-path-audit",
+    response_model=schemas.ContractPathAuditOut,
+    summary="合约地址捕捉路径巡检 (按链正确解析, 报告正确/错配/缺失)",
+)
+def contract_path_audit(
+    chain: Optional[str] = Query(default=None, description="按事件 chain 关键词过滤(可含多链)",
+),
+    db: Session = Depends(get_db),
+):
+    from app.services.contract_path import audit_contract_paths
+
+    return audit_contract_paths(db, chain=chain)

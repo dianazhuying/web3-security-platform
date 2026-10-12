@@ -42,6 +42,17 @@ async def lifespan(app: FastAPI):
         logger.info("[startup] 数据源自检结果: %s", check_source_reachability())
     except Exception as exc:  # noqa: BLE001 - 自检失败不影响启动
         logger.warning("[startup] 数据源自检异常: %s", exc)
+    # 5. 合约捕捉路径巡检 (运维诊断, 不阻断启动)
+    try:
+        from app.database import SessionLocal as _AuditSessionLocal
+        from app.services.contract_path import audit_contract_paths, audit_summary_text
+        _db = _AuditSessionLocal()
+        try:
+            logger.info("[startup] %s", audit_summary_text(audit_contract_paths(_db)))
+        finally:
+            _db.close()
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("[startup] 合约捕捉路径巡检异常: %s", exc)
     yield
     stop_scheduler()
 

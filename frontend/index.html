@@ -609,14 +609,16 @@
                 document.getElementById("eventTitle").innerText = d.title;
                 document.getElementById("eventSourceOrigin").innerText = d.source_origin;
 
-                // 核心合约/程序地址 (独立字段行): 真实地址跳链上浏览器, 占位地址原样展示, 缺失显示 --
+                // 核心合约/程序地址 (独立字段行): 真实地址跳链上浏览器并显示捕捉路径状态徽标
                 const caRaw = d.contract_address || "";
+                const cpValid = !!d.contract_path_valid;
+                const badge = `<span class="${cpValid ? "bg-green-50 text-green-600 border-green-500/40" : "bg-amber-50 text-amber-600 border-amber-500/40"} shrink-0 border px-1.5 py-0.5 rounded text-[10px] font-semibold">捕捉路径${cpValid ? "有效" : "异常"}</span>`;
                 const caRow = document.getElementById("contractAddressRow");
                 if (/^0x[a-fA-F0-9]{40}$/.test(caRaw)) {
                     const base = d.chain === "BSC" ? "https://bscscan.com/address/" : "https://etherscan.io/address/";
-                    caRow.innerHTML = `<a href="${base}${caRaw}" target="_blank" rel="noopener noreferrer" class="font-mono text-gold/90 hover:text-gold break-all min-w-0">${caRaw}</a>`;
+                    caRow.innerHTML = `<a href="${base}${caRaw}" target="_blank" rel="noopener noreferrer" class="font-mono text-gold/90 hover:text-gold break-all min-w-0">${caRaw}</a>${badge}`;
                 } else if (caRaw) {
-                    caRow.innerHTML = `<span class="font-mono text-inkSecondary break-all min-w-0">${caRaw}</span>`;
+                    caRow.innerHTML = `<span class="font-mono text-inkSecondary break-all min-w-0">${caRaw}</span>${badge}`;
                 } else {
                     caRow.innerHTML = `<span class="text-inkMuted">--</span>`;
                 }

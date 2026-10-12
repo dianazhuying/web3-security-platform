@@ -77,6 +77,28 @@ class IncidentOut(BaseModel):
     fetched_at: datetime
     trace_links: list[TraceLinkOut] = []
     trace_sources: list[TraceSourceOut] = []
+    # 由详情接口注入: 合约地址捕捉路径是否有效 (None=未计算)
+    contract_path_valid: Optional[bool] = None
+
+
+class ContractPathAuditItem(BaseModel):
+    incident_id: int
+    external_id: str
+    project_name: str
+    chain: str
+    contract_address: str
+    status: str          # valid / misassigned / missing
+    fail_type: str       # ok / no_address / placeholder / format_unknown / chain_unknown / chain_mismatch
+    resolved_chain: str
+    browser_url: str
+    hint: str
+
+
+class ContractPathAuditOut(BaseModel):
+    total: int
+    counts: dict[str, int]
+    fail_breakdown: dict[str, int]
+    items: list[ContractPathAuditItem]
 
 
 class IncidentListResponse(BaseModel):
