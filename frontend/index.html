@@ -230,47 +230,58 @@
                         </div>
                     </div>
 
-                    <!-- 模块 4: 风险大类 / 攻击根因 / 攻击特征 -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-2">
-                            <div class="text-xs text-inkMuted flex justify-between items-center font-semibold">
-                                <span class="flex items-center gap-1"><i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-gold/80"></i> 风险大类</span>
+                    <!-- 模块 4: 深度分析 (平铺直排) -->
+                    <div class="bg-[#F9FAFB] p-5 rounded-xl border border-line space-y-5">
+                        <div class="space-y-1.5">
+                            <div class="text-xs font-bold text-inkPrimary flex items-center gap-1.5">
+                                <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-gold/80"></i> 风险大类
                             </div>
-                            <div class="text-sm font-semibold text-inkPrimary" id="riskClass">--</div>
+                            <div class="text-sm font-semibold text-inkPrimary pl-5" id="riskClass">--</div>
                         </div>
-                        <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-2">
-                            <div class="text-xs text-inkMuted flex justify-between items-center font-semibold">
-                                <span class="flex items-center gap-1"><i data-lucide="crosshair" class="w-3.5 h-3.5 text-gold/80"></i> 攻击根因</span>
-                            </div>
-                            <div class="text-xs text-gold/90 font-mono bg-[#F9FAFB] p-2.5 rounded border border-line" id="rootCause">--</div>
-                        </div>
-                        <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-2">
-                            <div class="text-xs text-inkMuted flex justify-between items-center font-semibold">
-                                <span class="flex items-center gap-1"><i data-lucide="code-2" class="w-3.5 h-3.5 text-gold/80"></i> 攻击特征</span>
-                            </div>
-                            <div class="text-xs text-inkSecondary font-medium" id="sigDescription">--</div>
-                            <div class="text-xs text-inkMuted font-mono bg-[#F9FAFB] p-2.5 rounded border border-line" id="sigValues">--</div>
-                            <div class="flex items-start justify-between gap-2 text-xs" id="contractAddressRow" style="display:none"></div>
-                        </div>
-                    </div>
 
-                    <!-- 模块 5: 处置建议 -->
-                    <div class="bg-[#F9FAFB] p-4 rounded-xl border border-line space-y-3">
-                        <div class="text-xs font-semibold text-inkPrimary flex items-center gap-1.5 border-b border-line pb-2">
-                            <i data-lucide="check-circle-2" class="w-4 h-4 text-gold/80"></i> 处置建议
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div class="p-3.5 bg-[#F3F4F6] border border-line rounded-lg">
-                                <div class="text-xs font-bold text-inkSecondary mb-1 flex items-center gap-1">
-                                    <i data-lucide="user-x" class="w-3.5 h-3.5"></i> 终端用户
-                                </div>
-                                <p class="text-xs text-inkSecondary leading-relaxed font-medium" id="userAdvisory">--</p>
+                        <div class="space-y-1.5">
+                            <div class="text-xs font-bold text-inkPrimary flex items-center gap-1.5">
+                                <i data-lucide="crosshair" class="w-3.5 h-3.5 text-gold/80"></i> 攻击根因
                             </div>
-                            <div class="p-3.5 bg-[#F3F4F6] border border-line rounded-lg">
-                                <div class="text-xs font-bold text-inkSecondary mb-1 flex items-center gap-1">
-                                    <i data-lucide="building-2" class="w-3.5 h-3.5"></i> 项目方
+                            <div class="text-xs text-gold/90 font-mono bg-[#F3F4F6] p-2.5 rounded border border-line break-words pl-5" id="rootCause">--</div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="text-xs font-bold text-inkPrimary flex items-center gap-1.5">
+                                <i data-lucide="code-2" class="w-3.5 h-3.5 text-gold/80"></i> 攻击特征
+                            </div>
+                            <div class="pl-5 space-y-2">
+                                <div class="flex items-start gap-2 text-xs">
+                                    <span class="text-inkMuted shrink-0">特征描述：</span>
+                                    <span class="text-inkSecondary font-medium" id="sigDescription">--</span>
                                 </div>
-                                <p class="text-xs text-inkSecondary leading-relaxed font-medium" id="projectAdvisory">--</p>
+                                <div class="flex items-start gap-2 text-xs">
+                                    <span class="text-inkMuted shrink-0">SIG：</span>
+                                    <span class="font-mono text-gold/90 bg-[#F3F4F6] px-2 py-1 rounded border border-line break-all" id="sigValues">--</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="text-xs font-bold text-inkPrimary flex items-center gap-1.5">
+                                <i data-lucide="fingerprint" class="w-3.5 h-3.5 text-gold/80"></i> 核心合约/程序地址
+                            </div>
+                            <div class="pl-5 flex items-start gap-2 text-xs min-w-0" id="contractAddressRow"><span class="text-inkMuted">--</span></div>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <div class="text-xs font-bold text-inkPrimary flex items-center gap-1.5">
+                                <i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-gold/80"></i> 处置建议
+                            </div>
+                            <div class="pl-5 space-y-2">
+                                <div class="flex items-start gap-2 text-xs">
+                                    <span class="text-inkMuted shrink-0">终端用户：</span>
+                                    <span class="text-inkSecondary font-medium leading-relaxed" id="userAdvisory">--</span>
+                                </div>
+                                <div class="flex items-start gap-2 text-xs">
+                                    <span class="text-inkMuted shrink-0">项目方：</span>
+                                    <span class="text-inkSecondary font-medium leading-relaxed" id="projectAdvisory">--</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -598,17 +609,16 @@
                 document.getElementById("eventTitle").innerText = d.title;
                 document.getElementById("eventSourceOrigin").innerText = d.source_origin;
 
-                // 核心合约/程序地址: 整合进"攻击特征"区; 真实地址跳链上浏览器, 占位地址原样展示
+                // 核心合约/程序地址 (独立字段行): 真实地址跳链上浏览器, 占位地址原样展示, 缺失显示 --
                 const caRaw = d.contract_address || "";
                 const caRow = document.getElementById("contractAddressRow");
-                const caLabel = '<span class="text-inkMuted shrink-0">核心合约/程序地址</span>';
-                if (caRaw && /^0x[a-fA-F0-9]{40}$/.test(caRaw)) {
+                if (/^0x[a-fA-F0-9]{40}$/.test(caRaw)) {
                     const base = d.chain === "BSC" ? "https://bscscan.com/address/" : "https://etherscan.io/address/";
-                    caRow.innerHTML = caLabel + `<a href="${base}${caRaw}" target="_blank" rel="noopener noreferrer" class="font-mono text-gold/90 hover:text-gold break-all min-w-0">${caRaw}</a>`;
-                    caRow.style.display = "flex";
+                    caRow.innerHTML = `<a href="${base}${caRaw}" target="_blank" rel="noopener noreferrer" class="font-mono text-gold/90 hover:text-gold break-all min-w-0">${caRaw}</a>`;
                 } else if (caRaw) {
-                    caRow.innerHTML = caLabel + `<span class="font-mono text-inkSecondary break-all min-w-0">${caRaw}</span>`;
-                    caRow.style.display = "flex";
+                    caRow.innerHTML = `<span class="font-mono text-inkSecondary break-all min-w-0">${caRaw}</span>`;
+                } else {
+                    caRow.innerHTML = `<span class="text-inkMuted">--</span>`;
                 }
 
                 const traceContainer = document.getElementById("traceabilityLinksContainer");
