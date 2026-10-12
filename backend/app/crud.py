@@ -4,7 +4,15 @@ from typing import Optional
 from sqlalchemy import Integer, and_, exists, extract, func, or_, select
 from sqlalchemy.orm import Session
 
-from app.models import Incident, IncidentTraceLink
+from app.models import Incident, IncidentTraceLink, TraceSource
+
+# trace_sources.category → 等级数字
+_CATEGORY_LEVEL = {
+    "ALERT": 1,
+    "POST_MORTEM": 2,
+    "FORENSICS": 3,
+    "ONCHAIN_EVIDENCE": 4,
+}
 
 # 信源等级筛选: 按 L1-L4 中存在可点击链接(url非空)的等级数 (0-4)
 # 键 "0"-"4" 对应前端 L0-L4 语义 (L0=无可点击信源/未验证, Ln=达到该等级及以上);
@@ -94,20 +102,28 @@ def list_incidents(
     if report:
         target = VALID_REPORT.get(report)
         if target is not None:
-            # 达到所选等级及以上: 该事件存在"等级 >= target"的可点击链接(url 非空)。
-            # level 形如 "L3 深度分析", 首位字符即数字; cast->int 后与 target 比较。
-            # (修复: 不再用去重等级数量, 而是按最大达到等级过滤, 避免 L0 档误用 distinct 计数。
-            #  target=0 时 cast>=0 恒真, 等价于"存在任意非空链接", 即 L0=有信源/未验证。)
-            lvl_num = func.cast(func.substr(IncidentTraceLink.level, 2, 1), Integer)
-            filters.append(
-                exists(
-                    select(1).select_from(IncidentTraceLink).where(
-                        IncidentTraceLink.incident_id == Incident.id,
-                        IncidentTraceLink.url != "",
-                        lvl_num >= target,
-                    )
+            # 达到所选等级及以上: 合并 trace_links 与 trace_sources 两套信源,
+            # 任一来源存在"等级 >= target"的可点击凭证(url 非空) 即命中。
+            # trace_links.level 形如 "L3 深度分析" (首位字符即数字);
+            # trace_sources.category ∈ {ALERT..ONCHAIN_EVIDENCE} 映射 1-4。
+            # target=0 时任何非空可点击凭证均满足 (L0=有信源/未验证)。
+            link_lvl = func.cast(func.substr(IncidentTraceLink.level, 2, 1), Integer)
+            has_link_ge = exists(
+                select(1).select_from(IncidentTraceLink).where(
+                    IncidentTraceLink.incident_id == Incident.id,
+                    IncidentTraceLink.url != "",
+                    link_lvl >= target,
                 )
             )
+            cats_ge = [c for c, lv in _CATEGORY_LEVEL.items() if lv >= target]
+            has_source_ge = exists(
+                select(1).select_from(TraceSource).where(
+                    TraceSource.event_id == Incident.id,
+                    TraceSource.url != "",
+                    TraceSource.category.in_(cats_ge),
+                )
+            )
+            filters.append(or_(has_link_ge, has_source_ge))
 
     total = db.scalar(
         select(func.count()).select_from(Incident).where(*filters)

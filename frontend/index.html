@@ -293,6 +293,7 @@
                                 <i data-lucide="git-commit" class="w-4 h-4 text-gold/80"></i>
                                 <span class="text-inkPrimary font-bold">可信追溯报告 (4 等级精准穿透凭证)</span>
                             </div>
+                            <span id="traceOverallBadge" class="shrink-0"></span>
                             <span class="text-[10px] text-inkMuted">直达具体推文、具体复盘文章与链上交易 Hash</span>
                         </div>
                         <div class="relative pl-4 space-y-3 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-line" id="traceabilityLinksContainer">
@@ -624,22 +625,39 @@
                 }
 
                 const traceContainer = document.getElementById("traceabilityLinksContainer");
-                // 动态多源展示: 优先新管道 trace_sources, 回退旧 trace_links; 均只渲染 url 有效的
-                const CATEGORY_LABEL = { ALERT: "L1 警报现场", POST_MORTEM: "L2 技术复盘", FORENSICS: "L3 深度分析", ONCHAIN_EVIDENCE: "L4 链上凭证" };
-                const openSources = (d.trace_sources || []).filter(s => s && s.url);
-                const effective = openSources.length
-                    ? openSources.map(s => ({ level: CATEGORY_LABEL[s.category] || s.category, name: s.provider_name || s.title || "信息来源", url: s.url }))
-                    : (d.trace_links || []).filter(l => l && l.url).map(l => ({ level: l.level, name: l.name, url: l.url }));
+                // 合并双表信源 (新管道 trace_sources + 旧表 trace_links), 按 URL 去重, 总等级取最高。
+                // 口径与顶部"信源等级"筛选一致: 任一表达到所选等级即满足, 保证"筛选 L4 详情能展示 L4"。
+                const CATEGORY_LEVEL = { ALERT: 1, POST_MORTEM: 2, FORENSICS: 3, ONCHAIN_EVIDENCE: 4 };
+                const LEVEL_LABEL = { 1: "L1 警报现场", 2: "L2 技术快讯", 3: "L3 深度分析", 4: "L4 链上凭证" };
+                const lvlOf = (x) => {
+                    if (CATEGORY_LEVEL[x] !== undefined) return CATEGORY_LEVEL[x];
+                    const m = /^(L)(\d)/.exec(x || "");   // "L4 链上凭证" 首位数字即等级
+                    return m ? parseInt(m[2], 10) : 0;
+                };
+                const merged = {};
+                const putSrc = (url, name, lv) => {
+                    if (!url) return;
+                    merged[url] = merged[url] || { url, name: "", level: 0 };
+                    if (name) merged[url].name = name;
+                    if (lv > merged[url].level) merged[url].level = lv;
+                };
+                (d.trace_sources || []).forEach(s => s && putSrc(s.url, s.provider_name || s.title || "信息来源", lvlOf(s.category)));
+                (d.trace_links || []).forEach(l => l && putSrc(l.url, l.name || l.description || "来源", lvlOf(l.level)));
+                const effective = Object.values(merged).sort((a, b) => b.level - a.level);
+                const overall = effective.reduce((m, e) => Math.max(m, e.level), 0);
+                const overallBadge = document.getElementById("traceOverallBadge");
+                if (overallBadge) overallBadge.innerHTML = overall ? `<span class="text-[10px] bg-gold/10 text-gold border border-gold/30 px-1.5 py-0.5 rounded font-semibold">最高 L${overall} 级</span>` : "";
 
                 traceContainer.innerHTML = effective.length
                     ? effective.map((s, idx) => {
                         const cardId = idx === 0 ? "id='traceCard_L1'" : "";
+                        const lv = s.level ? (LEVEL_LABEL[s.level] || `L${s.level}`) : "信源";
                         return `
                             <div ${cardId} class="relative p-2.5 bg-white border border-line rounded-lg flex items-center justify-between gap-3 group">
                                 <div class="mx-1 w-2 h-2 rounded-full bg-gold border-2 border-white shrink-0"></div>
                                 <div class="flex items-center gap-3 min-w-0">
                                     <span class="text-xs font-semibold text-inkPrimary truncate">${s.name}</span>
-                                    <span class="text-[10px] bg-[#F3F4F6] text-inkSecondary border border-line px-1.5 py-0.5 rounded font-mono shrink-0">${s.level}</span>
+                                    <span class="text-[10px] bg-[#F3F4F6] text-inkSecondary border border-line px-1.5 py-0.5 rounded font-mono shrink-0">${lv}</span>
                                 </div>
                                 <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="text-[11px] bg-[#F3F4F6] hover:bg-gold hover:text-white text-inkSecondary px-2.5 py-1 rounded border border-line hover:border-gold transition shrink-0">
                                     查看来源 ↗
