@@ -30,6 +30,17 @@ class TraceLinkOut(BaseModel):
     sort_order: int
 
 
+class AttackStepOut(BaseModel):
+    """攻击链条单步 (1→2→3→4 纵向编号)."""
+
+    seq: int
+    title: str
+    desc: str
+    chain: str = ""
+    ref_url: str = ""        # 该步凭证跳转链接 (空=前端显示"暂未收录凭证")
+    confidence: Optional[float] = None   # 该步置信度 0-1, 可空
+
+
 class IncidentSummary(BaseModel):
     """列表项摘要."""
 
@@ -79,6 +90,8 @@ class IncidentOut(BaseModel):
     trace_sources: list[TraceSourceOut] = []
     # 由详情接口注入: 合约地址捕捉路径是否有效 (None=未计算)
     contract_path_valid: Optional[bool] = None
+    # 攻击链条: 详情接口注入, 存库值或按现有字段动态生成的 1→2→3→4 骨架
+    attack_steps: list[AttackStepOut] = []
 
 
 class ContractPathAuditItem(BaseModel):

@@ -1,0 +1,142 @@
+"""攻击链条服务.
+
+根据事件现有字段生成 1→2→3→4 纵向编号的攻击步骤骨架:
+1. 攻击入口    — 涉及链 + 合约/程序地址, 凭证=链上浏览器 URL (复用 contract_path.resolve_path).
+2. 利用技术    — 攻击根因 + 特征码 SIG, 凭证=首个有效的可信溯源 URL.
+3. 资金转移与影响 — 损失金额, 凭证=溯源 URL 或可空.
+4. 处置与缓解   — 终端用户 / 项目方处置建议.
+
+若未来 provider 能将真实攻击逐步复现写入 incidents.attack_steps, 则该存库值优先,
+仅在存库值为空时才动态生成此骨架. 缓存 __cache 按 incident.id 避免同一请求重复计算.
+"""
+from __future__ import annotations
+
+from typing import Any
+
+from app.models import Incident
+from app.schemas import AttackStepOut
+
+from app.services.contract_path import resolve_path
+
+__cache: dict[int, list[AttackStepOut]] = {}
+
+
+def _valid_trace_url(incident: Incident) -> str:
+    """取事件的首个有效溯源 URL 作为凭证 (兼容 dynamic list 与已物化 list)."""
+    sources = getattr(incident, "trace_sources", None)
+    if hasattr(sources, "all"):  # dynamic list → 物化
+        sources = sources.all()
+    for s in sources or []:
+        url = (s.url or "").strip()
+        if url:
+            return url
+    return ""
+
+
+def _format_loss_usd(loss_usd: float) -> str | None:
+    if not loss_usd or loss_usd <= 0:
+        return None
+    if loss_usd >= 1_000_000_000:
+        return f"${loss_usd / 1_000_000_000:.2f} B"
+    if loss_usd >= 1_000_000:
+        return f"${loss_usd / 1_000_000:.1f} M"
+    if loss_usd >= 1_000:
+        return f"${loss_usd / 1_000:.1f} K"
+    return f"${loss_usd:.0f}"
+
+
+def default_attack_steps(incident: Incident) -> list[AttackStepOut]:
+    """按现有字段构造 4 步攻击链条骨架. 纯函数, 只读 incident, 不落库."""
+    cid = getattr(incident, "id", None)
+    if cid is not None and cid in __cache:
+        return __cache[cid]
+
+    chain = incident.chain or ""
+    address = (incident.contract_address or "").strip()
+
+    # 步骤1 凭证: 合约/程序地址的链上浏览器 URL (复用捕捉路径解析, valid 才有)
+    entry_url = ""
+    if address and not address.startswith("DefiLlama#"):
+        pr = resolve_path(address, chain)
+        entry_url = pr.browser_url if pr.status == "valid" else ""
+
+    trace_url = _valid_trace_url(incident)
+
+    loss_usd = _format_loss_usd(incident.loss_usd or 0.0)
+    loss_text = (incident.loss_amount_text or "").strip()
+    impact_desc = f"本次攻击造成的损失估算为 {loss_text or (loss_usd or '暂无公开明细')}"
+
+    user_advisory = (incident.user_advisory or "").strip()
+    project_advisory = (incident.project_advisory or "").strip()
+    advisory = project_advisory or user_advisory or "暂无公开处置建议, 建议关注项目官方公告并暂停交互相关合约"
+    if project_advisory and user_advisory:
+        advisory = (
+            f"项目方处置建议: {project_advisory} | 终端用户建议: {user_advisory}"
+        )
+
+    steps: list[dict[str, Any]] = []
+
+    # 1. 攻击入口
+    if address and entry_url:
+        entry_desc = f"攻击者以 {address[:14]}… 为入口合约/程序地址展开攻击, 涉及公链 {chain or '未知'}."
+    elif address:
+        entry_desc = f"攻击入口指向合约/程序地址 {address}, 涉及公链 {chain or '未知'}, 暂未收录链上浏览器凭证."
+    else:
+        entry_desc = f"该事件未收录具体合约/程序地址, 涉及公链 {chain or '未知'}."
+    steps.append(
+        {
+            "seq": 1,
+            "title": "攻击入口",
+            "desc": entry_desc,
+            "chain": chain,
+            "ref_url": entry_url,
+            "confidence": 0.9,
+        }
+    )
+
+    # 2. 利用技术 (根因 + 特征码 SIG)
+    root_text = (incident.root_cause_text or "").strip()
+    sig = (incident.sig_val or "").strip()
+    tech_desc = root_text or "暂无明确根因描述"
+    if sig:
+        tech_desc = f"{tech_desc} (特征匹配: {sig})"
+    steps.append(
+        {
+            "seq": 2,
+            "title": "利用技术",
+            "desc": "攻击手法推断: " + tech_desc,
+            "chain": chain,
+            "ref_url": trace_url,
+            "confidence": 0.85,
+        }
+    )
+
+    # 3. 资金转移与影响
+    steps.append(
+        {
+            "seq": 3,
+            "title": "资金转移与影响",
+            "desc": impact_desc,
+            "chain": chain,
+            "ref_url": trace_url,
+            "confidence": 0.8,
+        }
+    )
+
+    # 4. 处置与缓解
+    steps.append(
+        {
+            "seq": 4,
+            "title": "处置与缓解",
+            "desc": advisory,
+            "chain": chain,
+            "ref_url": "",
+            "confidence": 0.9,
+        }
+    )
+
+    out = [AttackStepOut(**s) for s in steps]
+    # 仅缓存有 id 的持久化事件 (进程内命中, 避免链上并发重复计算)
+    if cid is not None:
+        __cache[cid] = out
+    return out

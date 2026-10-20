@@ -246,6 +246,16 @@
                             <div class="text-xs text-gold/90 font-mono bg-[#F3F4F6] p-2.5 rounded border border-line break-words pl-5" id="rootCause">--</div>
                         </div>
 
+                        <!-- 攻击链条时间线: 1→2→3→4 纵向步骤 -->
+                        <div class="space-y-1.5">
+                            <div class="text-xs font-bold text-inkPrimary flex items-center gap-1.5">
+                                <i data-lucide="git-branch" class="w-4 h-4 text-gold/80"></i> 攻击链条
+                            </div>
+                            <div class="pl-1">
+                                <div class="relative border-l-2 border-line ml-2 pl-5 space-y-4" id="attackTimelineContainer"></div>
+                            </div>
+                        </div>
+
                         <div class="space-y-1.5">
                             <div class="text-xs font-bold text-inkPrimary flex items-center gap-1.5">
                                 <i data-lucide="check-circle-2" class="w-4 h-4 text-gold/80"></i> 攻击特征
@@ -672,6 +682,41 @@
 
                 document.getElementById("riskClass").innerText = d.risk_class;
                 document.getElementById("rootCause").innerHTML = `${d.root_cause_text}`;
+
+                // ===== 攻击链条时间线: 1→2→3→4 纵向步骤, 含涉及链 / 凭证跳转 / 置信度 =====
+                const tlCtn = document.getElementById("attackTimelineContainer");
+                const steps = Array.isArray(d.attack_steps) ? d.attack_steps : [];
+                if (steps.length) {
+                    tlCtn.innerHTML = steps.map((s, i) => {
+                        const arrow = i < steps.length - 1
+                            ? `<div class="absolute -left-[7px] top-10 flex flex-col items-center text-inkMuted"><span class="text-[10px] font-mono">↓</span></div>` : "";
+                        const conf = s.confidence != null ? `<span class="text-[10px] bg-[#F3F4F6] text-inkSecondary border border-line px-1.5 py-0.5 rounded font-mono shrink-0">置信度 ${Math.round(s.confidence * 100)}%</span>` : "";
+                        const chainChip = s.chain ? `<span class="text-[10px] bg-gold/10 text-gold border border-gold/20 px-1.5 py-0.5 rounded font-mono shrink-0">${s.chain}</span>` : "";
+                        const cred = s.ref_url
+                            ? `<a href="${s.ref_url}" target="_blank" rel="noopener noreferrer" class="text-[10px] bg-[#F3F4F6] hover:bg-gold hover:text-white text-inkSecondary px-2 py-0.5 rounded border border-line hover:border-gold transition shrink-0">查看凭证 ↗</a>`
+                            : `<span class="text-[10px] bg-transparent text-inkMuted px-2 py-0.5 rounded border border-line cursor-not-allowed shrink-0">暂未收录凭证</span>`;
+                        return `
+                            <div class="relative">
+                                <div class="absolute -left-[7px] top-1 w-3.5 h-3.5 rounded-full bg-gold border-2 border-white shadow ring-2 ring-gold/20"></div>
+                                ${arrow}
+                                <div class="pl-1 space-y-1.5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[11px] font-bold text-gold/90 font-mono shrink-0">STEP ${s.seq || i + 1}</span>
+                                        <span class="text-xs font-bold text-inkPrimary">${s.title || ""}</span>
+                                        ${chainChip}
+                                        ${conf}
+                                    </div>
+                                    <p class="text-xs text-inkSecondary leading-relaxed">${s.desc || ""}</p>
+                                    <div class="flex items-center">${cred}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join("");
+                } else {
+                    tlCtn.innerHTML = `<div class="relative p-3 bg-white border border-line border-dashed rounded-xl">
+                        <span class="text-[11px] text-inkMuted">该事件暂无攻击链条信息</span>
+                       </div>`;
+                }
                 document.getElementById("sigDescription").innerText = "特征描述: " + d.sig_desc;
                 document.getElementById("sigValues").innerHTML = formatSig(d.sig_val);
 

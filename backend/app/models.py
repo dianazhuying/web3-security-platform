@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import (
+    JSON,
     DateTime,
     Float,
     ForeignKey,
@@ -45,6 +46,8 @@ class Incident(Base):
     sig_val: Mapped[str] = mapped_column(String(128), default="")
     user_advisory: Mapped[str] = mapped_column(Text, default="")
     project_advisory: Mapped[str] = mapped_column(Text, default="")
+    # 结构化攻击链条: 1→2→3→4 纵向步骤, 默认由现有字段动态生成, 可被 provider 真实逐步复现覆盖 (空列表=走动态骨架)
+    attack_steps: Mapped[list] = mapped_column(JSON, default=list)
     occurred_at: Mapped[Optional[datetime]] = mapped_column(DateTime, index=True, default=_utcnow)  # 事件发生时间(可空)
     fetched_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

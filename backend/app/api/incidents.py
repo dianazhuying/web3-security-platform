@@ -88,4 +88,9 @@ def get_incident(incident_id: int, db: Session = Depends(get_db)) -> Incident:
         if (incident.contract_address or "").strip()
         else False
     )
+    # 注入攻击链条: 优先存库值(provider 真实逐步复现), 空则按现有字段动态生成 1→2→3→4 骨架
+    from app.services.attack_chain import default_attack_steps
+
+    if not getattr(incident, "attack_steps", None):
+        incident.attack_steps = default_attack_steps(incident)
     return incident

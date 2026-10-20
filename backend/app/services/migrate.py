@@ -1,7 +1,7 @@
-"""数据库迁移: 幂等地为 incidents 表补充 occurred_at 列并回填存量数据.
+"""数据库迁移: 幂等地为 incidents 表补充 occurred_at 与 attack_steps 列并回填存量数据.
 
 create_all 不会给已存在的表加列, 需在启动时显式迁移:
-1. 检查 incidents 是否已有 occurred_at 列, 没有则 ALTER TABLE 添加.
+1. 检查 incidents 是否已有 occurred_at / attack_steps 列, 没有则 ALTER TABLE 添加.
 2. 对 occurred_at 为 NULL 的存量行, 从 DefiLlama 全量数据按 external_id 匹配回填真实事件发生时间.
 
 仅当存在缺失时执行, 不影响后续冷启动耗时.
@@ -30,6 +30,21 @@ def ensure_occurred_at_column(engine) -> None:
     with engine.begin() as conn:
         conn.execute(text(sql))
     logger.info("[migrate] incidents 表已新增 occurred_at 列")
+
+
+def ensure_attack_steps_column(engine) -> None:
+    """若 incidents 表缺少 attack_steps 列则添加 (幂等, SQLite / PostgreSQL 兼容)."""
+    dialect = engine.dialect.name
+    cols = {c["name"] for c in inspect(engine).get_columns("incidents")}
+    if "attack_steps" in cols:
+        return
+    if dialect == "postgresql":
+        sql = "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS attack_steps JSON"
+    else:  # sqlite: JSON 类型以文本存储
+        sql = "ALTER TABLE incidents ADD COLUMN attack_steps JSON"
+    with engine.begin() as conn:
+        conn.execute(text(sql))
+    logger.info("[migrate] incidents 表已新增 attack_steps 列")
 
 
 def backfill_occurred_at(db: Session) -> int:
@@ -84,6 +99,7 @@ def run_migrate(engine) -> None:
     """启动时一次性迁移入口: 加列 + 回填. 全程幂等, 不阻断启动."""
     try:
         ensure_occurred_at_column(engine)
+        ensure_attack_steps_column(engine)
     except Exception as exc:  # noqa: BLE001 - 迁移失败不阻断启动
         logger.warning("[migrate] 加列失败: %s", exc)
         return
