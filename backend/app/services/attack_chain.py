@@ -1,14 +1,13 @@
 """攻击链条服务.
 
-根据事件现有字段生成 1→2→3 纵向编号的攻击步骤骨架:
+根据事件现有字段生成 1→2 纵向编号的攻击步骤骨架:
 1. 攻击入口    — 涉及链 + 合约/程序地址, 凭证=链上浏览器 URL (复用 contract_path.resolve_path).
 2. 利用技术    — 攻击根因 + 特征码 SIG, 凭证=首个有效的可信溯源 URL.
-3. 资金转移与影响 — 损失金额, 凭证=溯源 URL 或可空.
 
-处置与缓解不纳入攻击链条: user_advisory / project_advisory 已在面板"处置建议"模块
-单独展示, 避免重复. 若未来 provider 能将真实攻击逐步复现写入 incidents.attack_steps,
-则该存库值优先, 仅在存库值为空时才动态生成此骨架. 缓存 __cache 按 incident.id 避免同一
-请求重复计算.
+处置与缓解、资金转移与影响不纳入攻击链条: user_advisory / project_advisory 已在面板
+"处置建议"模块单独展示, 损失金额已在左侧事件列表展示, 均避免重复. 若未来 provider 能
+将真实攻击逐步复现写入 incidents.attack_steps, 则该存库值优先, 仅在存库值为空时才动态
+生成此骨架. 缓存 __cache 按 incident.id 避免同一请求重复计算.
 """
 from __future__ import annotations
 
@@ -34,20 +33,8 @@ def _valid_trace_url(incident: Incident) -> str:
     return ""
 
 
-def _format_loss_usd(loss_usd: float) -> str | None:
-    if not loss_usd or loss_usd <= 0:
-        return None
-    if loss_usd >= 1_000_000_000:
-        return f"${loss_usd / 1_000_000_000:.2f} B"
-    if loss_usd >= 1_000_000:
-        return f"${loss_usd / 1_000_000:.1f} M"
-    if loss_usd >= 1_000:
-        return f"${loss_usd / 1_000:.1f} K"
-    return f"${loss_usd:.0f}"
-
-
 def default_attack_steps(incident: Incident) -> list[AttackStepOut]:
-    """按现有字段构造 4 步攻击链条骨架. 纯函数, 只读 incident, 不落库."""
+    """按现有字段构造 2 步攻击链条骨架. 纯函数, 只读 incident, 不落库."""
     cid = getattr(incident, "id", None)
     if cid is not None and cid in __cache:
         return __cache[cid]
@@ -62,10 +49,6 @@ def default_attack_steps(incident: Incident) -> list[AttackStepOut]:
         entry_url = pr.browser_url if pr.status == "valid" else ""
 
     trace_url = _valid_trace_url(incident)
-
-    loss_usd = _format_loss_usd(incident.loss_usd or 0.0)
-    loss_text = (incident.loss_amount_text or "").strip()
-    impact_desc = f"本次攻击造成的损失估算为 {loss_text or (loss_usd or '暂无公开明细')}"
 
     steps: list[dict[str, Any]] = []
 
@@ -101,18 +84,6 @@ def default_attack_steps(incident: Incident) -> list[AttackStepOut]:
             "chain": chain,
             "ref_url": trace_url,
             "confidence": 0.85,
-        }
-    )
-
-    # 3. 资金转移与影响
-    steps.append(
-        {
-            "seq": 3,
-            "title": "资金转移与影响",
-            "desc": impact_desc,
-            "chain": chain,
-            "ref_url": trace_url,
-            "confidence": 0.8,
         }
     )
 
