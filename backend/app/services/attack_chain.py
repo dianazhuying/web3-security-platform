@@ -1,13 +1,14 @@
 """攻击链条服务.
 
-根据事件现有字段生成 1→2→3→4 纵向编号的攻击步骤骨架:
+根据事件现有字段生成 1→2→3 纵向编号的攻击步骤骨架:
 1. 攻击入口    — 涉及链 + 合约/程序地址, 凭证=链上浏览器 URL (复用 contract_path.resolve_path).
 2. 利用技术    — 攻击根因 + 特征码 SIG, 凭证=首个有效的可信溯源 URL.
 3. 资金转移与影响 — 损失金额, 凭证=溯源 URL 或可空.
-4. 处置与缓解   — 终端用户 / 项目方处置建议.
 
-若未来 provider 能将真实攻击逐步复现写入 incidents.attack_steps, 则该存库值优先,
-仅在存库值为空时才动态生成此骨架. 缓存 __cache 按 incident.id 避免同一请求重复计算.
+处置与缓解不纳入攻击链条: user_advisory / project_advisory 已在面板"处置建议"模块
+单独展示, 避免重复. 若未来 provider 能将真实攻击逐步复现写入 incidents.attack_steps,
+则该存库值优先, 仅在存库值为空时才动态生成此骨架. 缓存 __cache 按 incident.id 避免同一
+请求重复计算.
 """
 from __future__ import annotations
 
@@ -66,14 +67,6 @@ def default_attack_steps(incident: Incident) -> list[AttackStepOut]:
     loss_text = (incident.loss_amount_text or "").strip()
     impact_desc = f"本次攻击造成的损失估算为 {loss_text or (loss_usd or '暂无公开明细')}"
 
-    user_advisory = (incident.user_advisory or "").strip()
-    project_advisory = (incident.project_advisory or "").strip()
-    advisory = project_advisory or user_advisory or "暂无公开处置建议, 建议关注项目官方公告并暂停交互相关合约"
-    if project_advisory and user_advisory:
-        advisory = (
-            f"项目方处置建议: {project_advisory} | 终端用户建议: {user_advisory}"
-        )
-
     steps: list[dict[str, Any]] = []
 
     # 1. 攻击入口
@@ -120,18 +113,6 @@ def default_attack_steps(incident: Incident) -> list[AttackStepOut]:
             "chain": chain,
             "ref_url": trace_url,
             "confidence": 0.8,
-        }
-    )
-
-    # 4. 处置与缓解
-    steps.append(
-        {
-            "seq": 4,
-            "title": "处置与缓解",
-            "desc": advisory,
-            "chain": chain,
-            "ref_url": "",
-            "confidence": 0.9,
         }
     )
 
