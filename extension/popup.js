@@ -1,5 +1,5 @@
 /**
- * ICE Sentinel — Popup 渲染逻辑
+ * ICE Intelligence — Popup 渲染逻辑
  *
  * 从 background 获取 check_context 结果, 按 max_severity 分级着色,
  * 提供跳转至 iceintel.xyz 对应详情的链接; matched=false 时展示干净空态。

@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "ICE Sentinel",
+  "name": "ICE Intelligence",
   "version": "0.1.0",
   "description": "在浏览区块链安全相关页面时, 实时检测并高亮 ICE Intelligence 收录的关联安全事件 (MVP)。",
   "minimum_chrome_version": "102",
@@ -14,7 +14,7 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "ICE Sentinel — 安全事件上下文检测"
+    "default_title": "ICE Intelligence — 安全事件上下文检测"
   },
   "background": {
     "service_worker": "background.js"

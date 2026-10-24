@@ -1,5 +1,5 @@
 /**
- * ICE Sentinel — Background Service Worker (Manifest V3)
+ * ICE Intelligence — Background Service Worker (Manifest V3)
  *
  * 职责: 调用后端 check_context 接口, 做轻量缓存, 向 popup 提供渲染数据。
  * 通信: popup.html 通过 chrome.runtime.sendMessage({type:'GET_CONTEXT'}) 获取缓存结果。

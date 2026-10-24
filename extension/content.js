@@ -1,5 +1,5 @@
 /**
- * ICE Sentinel — Content Script
+ * ICE Intelligence — Content Script
  *
  * 注入白名单站点 (Etherscan / Solscan), 提取当前页面上下文并上报 background。
  * TODO: 后续扩展 DeFi 域名白名单 (避免在 manifest 使用 <all_urls> 导致商店审核风险)。
