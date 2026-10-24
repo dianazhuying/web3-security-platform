@@ -3,7 +3,6 @@
   "name": "ICE Sentinel",
   "version": "0.1.0",
   "description": "在浏览区块链安全相关页面时, 实时检测并高亮 ICE Intelligence 收录的关联安全事件 (MVP)。",
-  "default_locale": "zh_CN",
   "minimum_chrome_version": "102",
   "permissions": [
     "storage",
