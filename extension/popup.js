@@ -80,8 +80,8 @@ function render(data) {
 async function init() {
   const query = await resolveQuery();
   try {
-    const resp = await chrome.runtime.sendMessage({ type: "GET_CONTEXT", query });
-    if (resp && resp.ok) {
+    const resp = await chrome.runtime.sendMessage({ type: "CHECK_CONTEXT", query });
+    if (resp && resp.success) {
       render(resp.data);
     } else {
       $("loading").style.display = "none";

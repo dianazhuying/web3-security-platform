@@ -1,0 +1,81 @@
+/* ICE Sentinel 网页端主动警告 Banner 高特异性样式 */
+#ice-sentinel-banner {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  z-index: 999999 !important;
+  box-sizing: border-box !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  padding: 12px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease !important;
+}
+
+#ice-sentinel-banner.severity-critical,
+#ice-sentinel-banner.severity-high {
+  background-color: #FEF2F2 !important;
+  color: #991B1B !important;
+  border-bottom: 2px solid #EF4444 !important;
+}
+
+#ice-sentinel-banner .banner-content {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  flex: 1 !important;
+}
+
+#ice-sentinel-banner .banner-icon {
+  font-size: 18px !important;
+}
+
+#ice-sentinel-banner .banner-title {
+  font-weight: 700 !important;
+}
+
+#ice-sentinel-banner .banner-desc {
+  opacity: 0.9 !important;
+  margin-left: 8px !important;
+}
+
+#ice-sentinel-banner .banner-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+}
+
+#ice-sentinel-banner .banner-btn {
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+  padding: 6px 14px !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  font-size: 13px !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+#ice-sentinel-banner .banner-btn:hover {
+  background-color: #1D4ED8 !important;
+}
+
+#ice-sentinel-banner .banner-close {
+  background: transparent !important;
+  border: none !important;
+  color: inherit !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  padding: 0 4px !important;
+  opacity: 0.7 !important;
+}
+
+#ice-sentinel-banner .banner-close:hover {
+  opacity: 1 !important;
+}
