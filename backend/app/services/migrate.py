@@ -47,6 +47,21 @@ def ensure_attack_steps_column(engine) -> None:
     logger.info("[migrate] incidents 表已新增 attack_steps 列")
 
 
+def ensure_official_domains_column(engine) -> None:
+    """若 incidents 表缺少 official_domains 列则添加 (幂等, SQLite / PostgreSQL 兼容)."""
+    dialect = engine.dialect.name
+    cols = {c["name"] for c in inspect(engine).get_columns("incidents")}
+    if "official_domains" in cols:
+        return
+    if dialect == "postgresql":
+        sql = "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS official_domains JSON"
+    else:  # sqlite: JSON 类型以文本存储
+        sql = "ALTER TABLE incidents ADD COLUMN official_domains JSON"
+    with engine.begin() as conn:
+        conn.execute(text(sql))
+    logger.info("[migrate] incidents 表已新增 official_domains 列")
+
+
 def backfill_occurred_at(db: Session) -> int:
     """从 DefiLlama 按 external_id 回填 occurred_at, 返回更新的行数 (仅处理 NULL 行).
 
@@ -100,6 +115,7 @@ def run_migrate(engine) -> None:
     try:
         ensure_occurred_at_column(engine)
         ensure_attack_steps_column(engine)
+        ensure_official_domains_column(engine)
     except Exception as exc:  # noqa: BLE001 - 迁移失败不阻断启动
         logger.warning("[migrate] 加列失败: %s", exc)
         return

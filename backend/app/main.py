@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from app.api import corrections, fetch, incidents, stats
+from app.api import corrections, extension, fetch, incidents, stats
 from app.config import settings
 from app.database import Base, SessionLocal, engine
 from app.logging_config import setup_logging
@@ -67,12 +67,15 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
+    # Chrome 扩展 (chrome-extension://<id>) 来源用正则放行, 不能写在 allow_origins 通配
+    allow_origin_regex=r"chrome-extension://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 app.include_router(incidents.router, prefix=settings.API_PREFIX, tags=["incidents"])
+app.include_router(extension.router, prefix=settings.API_PREFIX, tags=["extension"])
 app.include_router(corrections.router, prefix=settings.API_PREFIX, tags=["corrections"])
 app.include_router(stats.router, prefix=settings.API_PREFIX, tags=["stats"])
 app.include_router(fetch.router, prefix=settings.API_PREFIX, tags=["fetch"])

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICE Sentinel</title>
+    <style>
+        :root {
+            --brand: #2563EB;
+            --bg: #F8F9FA;
+            --panel: #FFFFFF;
+            --line: #E5E7EB;
+            --ink-1: #1F2937;
+            --ink-2: #6B7280;
+            --ink-3: #9CA3AF;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: var(--bg);
+            color: var(--ink-1);
+            font-family: -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+            width: 340px;
+            font-size: 13px;
+        }
+        .header {
+            background: var(--panel);
+            border-bottom: 1px solid var(--line);
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo { width: 26px; height: 26px; border-radius: 7px; background: var(--brand); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-size: 12px; }
+        .title { font-weight: 700; color: var(--ink-1); font-size: 14px; }
+        .subtitle { color: var(--ink-3); font-size: 11px; }
+        .match-tag { margin-left: auto; font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 9999px; }
+        .match-tag.safe { background: #ECFDF5; color: #059669; }
+        .match-tag.danger { background: #FEF2F2; color: #DC2626; }
+        .body { padding: 14px 16px; }
+        .empty { text-align: center; padding: 26px 0 20px; color: var(--ink-2); }
+        .empty .shield { font-size: 30px; }
+        .empty .msg { margin-top: 8px; font-size: 13px; }
+        .empty .sub { margin-top: 4px; color: var(--ink-3); font-size: 11px; }
+        .item { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; }
+        .row-top { display: flex; align-items: center; gap: 8px; }
+        .sev {
+            flex: none; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 6px; letter-spacing: 0.02em;
+        }
+        .sev.Critical { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
+        .sev.High { background: #FFF7ED; color: #C2410C; border: 1px solid #FED7AA; }
+        .sev.Medium { background: #FFFBEB; color: #B45309; border: 1px solid #FDE68A; }
+        .sev.Low { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+        .sev.err { background: #F3F4F6; color: #6B7280; border: 1px solid #E5E7EB; }
+        .incident-title { font-weight: 600; color: var(--ink-1); flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .meta { margin-top: 6px; color: var(--ink-2); font-size: 11px; }
+        .meta .kv { margin-top: 2px; }
+        .meta .lbl { color: var(--ink-3); margin-right: 4px; }
+        .meta .code { font-family: "SF Mono", Consolas, Menlo, monospace; color: var(--brand); background: #EFF6FF; padding: 1px 5px; border-radius: 4px; }
+        .goto { margin-top: 8px; text-align: right; }
+        .goto a { color: var(--brand); text-decoration: none; font-size: 11px; font-weight: 600; }
+        .goto a:hover { text-decoration: underline; }
+        .footer { padding: 10px 16px; border-top: 1px solid var(--line); color: var(--ink-3); font-size: 10px; display: flex; justify-content: space-between; }
+        .loading { text-align: center; color: var(--ink-2); padding: 26px 0 20px; font-size: 13px; }
+        .spinner { width: 18px; height: 18px; border: 2px solid var(--line); border-top-color: var(--brand); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error { color: #DC2626; font-size: 12px; padding: 14px 0; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">ICE</div>
+        <div>
+            <div class="title">ICE Sentinel</div>
+            <div class="subtitle">安全事件上下文检测</div>
+        </div>
+        <span class="match-tag safe" id="matchTag" style="display:none"></span>
+    </div>
+
+    <div class="body" id="body">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div>正在检测当前页面上下文…</div>
+        </div>
+        <div class="error" id="error" style="display:none"></div>
+        <div class="empty" id="empty" style="display:none">
+            <div class="shield">🛡️</div>
+            <div class="msg">未检测到关联安全事件</div>
+            <div class="sub">当前页面上下文为安全</div>
+        </div>
+        <div id="list"></div>
+    </div>
+
+    <div class="footer">
+        <span>ICE Intelligence</span>
+        <span>ICE Sentinel v0.1</span>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

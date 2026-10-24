@@ -170,6 +170,25 @@ class CategoryCount(BaseModel):
     count: int
 
 
+class ExtensionIncidentMatch(BaseModel):
+    """Chrome 扩展上下文匹配到的事件条目 (契约字段, 严重度枚举严格限定大小写)."""
+
+    id: int
+    title: str
+    severity: Optional[str] = None   # Low / Medium / High / Critical
+    root_cause: str = ""             # 根因
+    sig: str = ""                    # 特征码
+
+
+class ExtensionCheckOut(BaseModel):
+    """check_context 响应: 成功含 incidents; 空态必须返回 matched=false + 空数组."""
+
+    matched: bool
+    count: int
+    max_severity: Optional[str] = None   # Low / Medium / High / Critical / null
+    incidents: list[ExtensionIncidentMatch] = []
+
+
 class StatsOut(BaseModel):
     """看板统计."""
 

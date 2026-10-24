@@ -3,11 +3,11 @@ from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy import (
-    JSON,
     DateTime,
     Float,
     ForeignKey,
     Integer,
+    JSON,
     String,
     Text,
     func,
@@ -33,6 +33,8 @@ class Incident(Base):
     project_name: Mapped[str] = mapped_column(String(128), index=True)
     contract_type: Mapped[str] = mapped_column(String(128), default="")
     contract_address: Mapped[str] = mapped_column(String(128), default="")
+    # 官方域名白名单 (JSON 数组, 供 Chrome 扩展按域名匹配安全事件, 如 ["makerdao.com","app.makerdao.com"])
+    official_domains: Mapped[list] = mapped_column(JSON, default=list)
     loss_amount_text: Mapped[str] = mapped_column(String(64), default="")
     loss_usd: Mapped[float] = mapped_column(Float, default=0.0)
     remark: Mapped[str] = mapped_column(Text, default="")
