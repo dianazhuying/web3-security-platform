@@ -14,7 +14,7 @@ from app.database import Base, SessionLocal, engine
 from app.logging_config import setup_logging
 from app.services.scheduler import start_scheduler, stop_scheduler
 from app.services.seed import seed_incidents
-from app.services.migrate import run_migrate
+from app.services.migrate import add_missing_columns, backfill_occurred_at_safe
 
 setup_logging()
 logger = logging.getLogger(__name__)
@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     # 1. 建表
     Base.metadata.create_all(bind=engine)
-    # 1b. 数据库迁移 (幂等, 失败不阻断启动)
-    run_migrate(engine)
+    # 1b. 快速加列 (<1s, 无网络请求) —— backfill 在后台线程做
+    add_missing_columns(engine)
     # 2. 首次启动填充历史事件
     db = SessionLocal()
     try:
@@ -38,14 +38,19 @@ async def lifespan(app: FastAPI):
     # 3. 启动每小时定时抓取
     start_scheduler()
 
-    # 4. 后台线程执行同步网络请求 (数据源自检 ~50s / 合约巡检 ~0s)
-    # 放在 yield 前启动, 不阻塞 uvicorn 监听 —— Render 健康检查 30s 超时能通过
+    # 4. 后台线程执行所有同步网络请求, 不阻塞 uvicorn 监听端口
+    # Render free tier 健康检查超时 30s + Post scan timeout 必须在端口开放前通过
+    # yield 前只保留 <1s 操作, 确保 uvicorn 立刻开始监听
     def _run_post_startup_checks():
+        # backfill_occurred_at: 60s timeout 请求 DefiLlama API
+        backfill_occurred_at_safe()
+        # check_source_reachability: ~50s 多源检测
         try:
             from app.services.fetcher import check_source_reachability
             logger.info("[startup] 数据源自检结果: %s", check_source_reachability())
         except Exception as exc:  # noqa: BLE001
             logger.warning("[startup] 数据源自检异常: %s", exc)
+        # 合约捕捉路径巡检
         try:
             from app.database import SessionLocal as _AuditSessionLocal
             from app.services.contract_path import audit_contract_paths, audit_summary_text

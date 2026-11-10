@@ -110,15 +110,28 @@ def backfill_occurred_at(db: Session) -> int:
     return updated
 
 
-def run_migrate(engine) -> None:
-    """启动时一次性迁移入口: 加列 + 回填. 全程幂等, 不阻断启动."""
+def add_missing_columns(engine) -> None:
+    """快速加列 (无网络请求, <1s, 供 lifespan yield 前同步执行)."""
     try:
         ensure_occurred_at_column(engine)
         ensure_attack_steps_column(engine)
         ensure_official_domains_column(engine)
     except Exception as exc:  # noqa: BLE001 - 迁移失败不阻断启动
         logger.warning("[migrate] 加列失败: %s", exc)
-        return
+
+
+def run_migrate(engine) -> None:
+    """启动时一次性迁移入口: 加列 + 回填. 全程幂等, 不阻断启动.
+
+    注意: backfill_occurred_at 有 60s 网络请求, 不要在 lifespan yield 前调用.
+    若需完全不阻塞启动, 改用 add_missing_columns + 后台线程调用 backfill_occurred_at.
+    """
+    add_missing_columns(engine)
+    backfill_occurred_at_safe()
+
+
+def backfill_occurred_at_safe() -> None:
+    """独立回填入口 (自带 try/except, 供后台线程安全调用)."""
     db = None
     try:
         from app.database import SessionLocal
