@@ -4,14 +4,20 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from app.config import settings
 
+# SQLAlchemy 2.x 不认 postgres:// scheme —— Render 默认注入 postgres://, 需转成 postgresql://
+_db_url = settings.DATABASE_URL
+if _db_url.startswith("postgres://"):
+    _db_url = "postgresql://" + _db_url[len("postgres://"):]
+    print(f"[database] 已将 postgres:// scheme 规范化为 postgresql://")
+
 _connect_args = (
     {"check_same_thread": False}
-    if settings.DATABASE_URL.startswith("sqlite")
+    if _db_url.startswith("sqlite")
     else {}
 )
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    _db_url,
     connect_args=_connect_args,
     pool_pre_ping=True,
     future=True,
