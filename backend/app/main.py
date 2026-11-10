@@ -1,5 +1,6 @@
 """FastAPI 应用入口."""
 import logging
+import threading
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     # 1. 建表
     Base.metadata.create_all(bind=engine)
-    # 1b. 数据库迁移 (幂等: 加 occurred_at 列 + 回填存量发生时间, 失败不阻断启动)
+    # 1b. 数据库迁移 (幂等, 失败不阻断启动)
     run_migrate(engine)
     # 2. 首次启动填充历史事件
     db = SessionLocal()
@@ -36,23 +37,27 @@ async def lifespan(app: FastAPI):
         db.close()
     # 3. 启动每小时定时抓取
     start_scheduler()
-    # 4. 数据源自检 (诊断真实源可达性, 不阻断启动)
-    try:
-        from app.services.fetcher import check_source_reachability
-        logger.info("[startup] 数据源自检结果: %s", check_source_reachability())
-    except Exception as exc:  # noqa: BLE001 - 自检失败不影响启动
-        logger.warning("[startup] 数据源自检异常: %s", exc)
-    # 5. 合约捕捉路径巡检 (运维诊断, 不阻断启动)
-    try:
-        from app.database import SessionLocal as _AuditSessionLocal
-        from app.services.contract_path import audit_contract_paths, audit_summary_text
-        _db = _AuditSessionLocal()
+
+    # 4. 后台线程执行同步网络请求 (数据源自检 ~50s / 合约巡检 ~0s)
+    # 放在 yield 前启动, 不阻塞 uvicorn 监听 —— Render 健康检查 30s 超时能通过
+    def _run_post_startup_checks():
         try:
-            logger.info("[startup] %s", audit_summary_text(audit_contract_paths(_db)))
-        finally:
-            _db.close()
-    except Exception as exc:  # noqa: BLE001
-        logger.warning("[startup] 合约捕捉路径巡检异常: %s", exc)
+            from app.services.fetcher import check_source_reachability
+            logger.info("[startup] 数据源自检结果: %s", check_source_reachability())
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("[startup] 数据源自检异常: %s", exc)
+        try:
+            from app.database import SessionLocal as _AuditSessionLocal
+            from app.services.contract_path import audit_contract_paths, audit_summary_text
+            _db = _AuditSessionLocal()
+            try:
+                logger.info("[startup] %s", audit_summary_text(audit_contract_paths(_db)))
+            finally:
+                _db.close()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("[startup] 合约捕捉路径巡检异常: %s", exc)
+
+    threading.Thread(target=_run_post_startup_checks, daemon=True).start()
     yield
     stop_scheduler()
 
