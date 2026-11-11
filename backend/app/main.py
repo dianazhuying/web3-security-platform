@@ -1,11 +1,13 @@
 """FastAPI 应用入口."""
 import logging
 import threading
+import traceback
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api import corrections, extension, fetch, incidents, stats
@@ -99,6 +101,24 @@ app = FastAPI(
     description="Web3 全网安全事件抓取与分析平台后端",
     lifespan=lifespan,
 )
+
+
+@app.exception_handler(Exception)
+async def _global_exception_handler(request: Request, exc: Exception):
+    """全局异常处理器: 返回详细 traceback 便于排查 PostgreSQL 兼容性问题.
+
+    生产环境临时开启, 问题定位后移除.
+    """
+    tb = traceback.format_exc()
+    logger.error("[api] %s %s 异常:\n%s", request.method, request.url.path, tb)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": str(exc),
+            "traceback": tb,
+            "path": request.url.path,
+        },
+    )
 
 app.add_middleware(
     CORSMiddleware,

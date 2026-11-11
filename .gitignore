@@ -22,4 +22,4 @@ backend/logs/
 .idea/
 
 # IDE 内部目录
-.trae/
+.trae/_PRD_*
